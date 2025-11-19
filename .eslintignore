@@ -1,8 +1,0 @@
-# Build files
-dist
-node_modules
-
-# Config files
-vite.config.ts
-tailwind.config.mjs
-postcss.config.mjs
