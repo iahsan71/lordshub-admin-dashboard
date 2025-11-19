@@ -1,30 +1,212 @@
-# Admin dashboard (3)
+# Lords Hub - Admin Dashboard
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A comprehensive admin panel for managing gaming products, chat, offers, and analytics with a beautiful bluish-yellow theme.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/ahsanafzal129-6090s-projects/v0-admin-dashboard)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/DhkR5jZUhL6)
+## 🎨 Features
 
-## Overview
+### 1. **Dashboard Overview**
+- Real-time statistics cards with animations
+- Total Products, Sold Products, Pending Payments, Open Chats, Total Revenue
+- Products by Category (pie chart visualization)
+- Recent Activity feed
+- Quick Actions for common tasks
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+### 2. **Product Management**
+Organized into 4 main categories with dedicated pages:
 
-## Deployment
+#### 📱 **Accounts** (`/dashboard/accounts`)
+- Lords Mobile, PUBG, Free Fire accounts
+- Detailed specifications (Castle Star, Might, Troops, etc.)
+- Image gallery support (6-10 images)
+- Status tracking (Available/Sold/Pending)
+- Advanced filters and search
 
-Your project is live at:
+#### 💎 **Diamonds** (`/dashboard/diamonds`)
+- Free Fire diamonds packages
+- Built-in calculator for pricing
+- Bonus badges
+- Attractive card-based UI
 
-**[https://vercel.com/ahsanafzal129-6090s-projects/v0-admin-dashboard](https://vercel.com/ahsanafzal129-6090s-projects/v0-admin-dashboard)**
+#### 💠 **Gems** (`/dashboard/gems`)
+- Lords Mobile gems packages
+- Quick stats overview
+- Package management
 
-## Build your app
+#### 🤖 **Bots** (`/dashboard/bots`)
+- Gaming automation tools
+- Subscription management
+- Feature lists
+- Duration tracking
 
-Continue building your app on:
+### 3. **Chat Management** (`/dashboard/chat`)
+- Real-time customer conversations
+- Chat list with filters (New, Payment Marked, Verified, Completed)
+- Status badges and unread counters
+- Quick reply templates
+- Order status timeline
+- File attachment support
+- Payment proof display
 
-**[https://v0.app/chat/DhkR5jZUhL6](https://v0.app/chat/DhkR5jZUhL6)**
 
-## How It Works
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## 🎨 Design Features
+
+### Theme
+- **Primary Color**: Blue (#3b82f6)
+- **Secondary Color**: Yellow (#fbbf24)
+- **Dark Background**: Navy (#0a0e27, #1a1f3a)
+- Gradient combinations throughout
+- Smooth animations and transitions
+
+### UI Components
+- Animated cards with hover effects
+- Gradient buttons and badges
+- Custom scrollbars
+- Responsive grid layouts
+- Smooth page transitions
+- Loading animations
+
+## 🚀 Technology Stack
+
+- **Frontend**: React.js + TypeScript + Vite
+- **Styling**: Tailwind CSS with custom theme
+- **Routing**: React Router DOM
+- **Backend**: Firebase
+  - Authentication (Admin login)
+  - Firestore (Products, Settings, Offers)
+  - Realtime Database (Chat system)
+  - Storage (Images, Videos)
+  - Analytics
+
+## 📦 Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 🔥 Firebase Configuration
+
+Update `src/config/firebase.ts` with your Firebase credentials:
+
+```typescript
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID"
+};
+```
+
+## 📱 Routes
+
+- `/` - Redirects to dashboard
+- `/login` - Admin login
+- `/dashboard` - Main dashboard
+- `/dashboard/accounts` - Accounts management
+- `/dashboard/gems` - Gems management
+- `/dashboard/diamonds` - Diamonds management
+- `/dashboard/bots` - Bots management
+- `/dashboard/chat` - Chat management
+
+## 🔐 Security
+
+- Admin-only authentication
+- Protected routes with AuthGuard
+- Firebase Security Rules (configure in Firebase Console)
+- Secure file upload validation
+
+## 🎯 Key Features Implementation
+
+### Sidebar Navigation
+- Collapsible product categories
+- Active route highlighting
+- Gradient hover effects
+- Smooth animations
+
+### Product Cards
+- Image galleries
+- Status badges
+- Quick actions (Edit/Delete)
+- Hover animations
+
+### Chat System
+- Real-time messaging
+- Status management
+- Quick replies
+- File attachments
+- Unread counters
+
+### Responsive Design
+- Mobile-first approach
+- Tablet and desktop optimized
+- Flexible grid layouts
+- Touch-friendly interfaces
+
+## 📊 Firebase Collections Structure
+
+```
+products/
+  - id
+  - title
+  - description
+  - price
+  - category (Accounts/Gems/Diamonds/Bots)
+  - subCategory
+  - specifications {}
+  - images []
+  - status
+  - createdAt
+
+settings/
+  - bankDetails {}
+  - contactInfo {}
+  - platformSettings {}
+  - socialMedia {}
+
+offers/
+  - id
+  - title
+  - discount
+  - startDate
+  - endDate
+  - status
+  - productIds []
+  - bannerImage
+
+chats/ (Realtime Database)
+  - chatId/
+    - messages/
+    - status
+    - customer
+    - lastMessage
+```
+
+## 🎨 Customization
+
+The theme can be customized in `src/index.css`:
+- Modify CSS variables for colors
+- Adjust gradient combinations
+- Update animation timings
+- Change border radius values
+
+## 📝 License
+
+Private - Lords Hub Gaming Platform
+
+## 🤝 Support
+
+For support, contact: support@lordshub.com

@@ -2,150 +2,188 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 import { JSX, useState } from "react";
-import logo from "@/assets/imgs/logo.png";
 import { ConfirmationModal } from "./ui/confirmationModal";
+import logo from "../assets/imgs/logo.png";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
-  { name: "Products", href: "/dashboard/products", icon: "Package" },
+  { 
+    name: "Products", 
+    icon: "Package",
+    subItems: [
+      { name: "Accounts", href: "/dashboard/accounts", icon: "User" },
+      { name: "Gems", href: "/dashboard/gems", icon: "Gem" },
+      { name: "Diamonds", href: "/dashboard/diamonds", icon: "Diamond" },
+      { name: "Bots", href: "/dashboard/bots", icon: "Bot" },
+    ]
+  },
   { name: "Chat", href: "/dashboard/chat", icon: "MessageSquare" },
 ];
 
 function getIcon(iconName: string) {
   const icons: Record<string, JSX.Element> = {
     LayoutDashboard: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25m0 0H5.25M7.5 10.875C7.5 10.254 8.004 9.75 8.625 9.75h2.25m0 0H9.75M15 10.875C15 10.254 15.504 9.75 16.125 9.75h2.25M19.125 12a.75.75 0 00-.75.75v2.25m0 0V21m0 0H3.75m16.5 0H21m0 0v-2.25m0-10.5a.75.75 0 00-.75-.75h-2.25M15 12.75h2.25"
-        />
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
       </svg>
     ),
     Package: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M20.354 15.354A9 9 0 015.646 5.646 9 9 0 1020.354 15.354z"
-        />
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    ),
+    User: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+    Gem: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    ),
+    Diamond: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l7 18M19 3l-7 18M3 8h18M4 16h16" />
+      </svg>
+    ),
+    Bot: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
     ),
     MessageSquare: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M7 8h10M7 12h4m1 8l-4-2H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z"
-        />
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
     ),
-    Tag: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-        />
-      </svg>
-    ),
-    Settings: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    ),
-    BarChart3: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        />
+    ChevronDown: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     ),
   };
   return icons[iconName] || null;
 }
 
-export function Sidebar() {
+type SidebarProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Products"]);
+
+  const toggleExpand = (name: string) => {
+    setExpandedItems(prev => 
+      prev.includes(name) ? prev.filter(i => i !== name) : [...prev, name]
+    );
+  };
+
+  const handleLinkClick = () => {
+    // Close sidebar on mobile when a link is clicked
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
 
   return (
     <>
-      <aside className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
+      <aside
+        className={cn(
+          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
+      >
+        {/* Header */}
         <div className="p-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <img
-              src={logo}
-              alt="Lords Hub Logo"
-              className="w-12 h-12 rounded-lg object-cover"
-            />
-            <span className="font-bold text-sidebar-foreground">Lords Hub</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img
+                src={logo}
+                alt="Lords Hub Logo"
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+              <div>
+                <span className="font-bold text-sidebar-foreground block">Lords Hub</span>
+                <span className="text-xs text-muted-foreground">Admin Panel</span>
+              </div>
+            </div>
+            {/* Close button for mobile */}
+            <button
+              onClick={onClose}
+              className="lg:hidden p-2 rounded-lg hover:bg-sidebar-accent/20 text-sidebar-foreground transition-colors"
+              aria-label="Close sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
-            const isActive =
-              location.pathname === item.href ||
-              location.pathname.startsWith(item.href + "/");
+            const hasSubItems = 'subItems' in item && item.subItems;
+            const isExpanded = expandedItems.includes(item.name);
+            
+            if (hasSubItems) {
+              return (
+                <div key={item.name} className="space-y-1">
+                  <button
+                    onClick={() => toggleExpand(item.name)}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-sidebar-accent/20 text-sidebar-foreground"
+                  >
+                    <div className="flex items-center gap-3">
+                      {getIcon(item.icon)}
+                      <span>{item.name}</span>
+                    </div>
+                    <div className={cn("transition-transform", isExpanded && "rotate-180")}>
+                      {getIcon("ChevronDown")}
+                    </div>
+                  </button>
+                  {isExpanded && (
+                    <div className="ml-4 space-y-1 animate-in slide-in-from-top-2">
+                      {item.subItems.map((subItem) => {
+                        const isActive = location.pathname === subItem.href;
+                        return (
+                          <Link
+                            key={subItem.href}
+                            to={subItem.href}
+                            onClick={handleLinkClick}
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all",
+                              isActive
+                                ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg"
+                                : "text-sidebar-foreground hover:bg-sidebar-accent/20 hover:translate-x-1"
+                            )}
+                          >
+                            {getIcon(subItem.icon)}
+                            <span>{subItem.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            const isActive = location.pathname === item.href;
             return (
               <Link
                 key={item.href}
                 to={item.href}
+                onClick={handleLinkClick}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all",
                   isActive
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/20 text-sidebar-foreground"
+                    ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/20 hover:translate-x-1"
                 )}
               >
                 {getIcon(item.icon)}
@@ -155,15 +193,18 @@ export function Sidebar() {
           })}
         </nav>
 
+        {/* Logout Button */}
         <div className="p-4 border-t border-sidebar-border">
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full px-4 py-3 text-sm font-medium rounded-lg bg-sidebar-accent/20 text-sidebar-accent-foreground hover:bg-sidebar-accent/30 transition-colors"
+            className="w-full px-4 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-destructive to-destructive/80 text-white hover:shadow-lg transition-all"
           >
             Logout
           </button>
         </div>
       </aside>
+
+      {/* Logout Confirmation Modal */}
       <ConfirmationModal
         open={showLogoutModal}
         title="Confirm Logout"
