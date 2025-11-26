@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -92,14 +92,7 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground text-center">
-                Don't have an account?{' '}
-                <Link to="/register" className="text-primary hover:text-primary/80 font-medium">
-                  Register
-                </Link>
-              </p>
-            </div>
+
           </CardContent>
         </Card>
 

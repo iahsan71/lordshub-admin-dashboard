@@ -1,4 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser 
+} from 'firebase/auth'
+import { auth } from '@/config/firebase'
 
 interface User {
   id: string
@@ -11,8 +18,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, name: string) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,21 +27,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Check for existing auth token on mount
+  // Listen to Firebase auth state changes
   useEffect(() => {
-    const authToken = localStorage.getItem('authToken')
-    const userData = localStorage.getItem('user')
-    
-    if (authToken && userData) {
-      try {
-        setUser(JSON.parse(userData))
-      } catch (error) {
-        console.error('Failed to parse user data:', error)
-        localStorage.removeItem('authToken')
-        localStorage.removeItem('user')
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          name: firebaseUser.email?.split('@')[0] || 'Admin',
+        })
+      } else {
+        setUser(null)
       }
-    }
-    setIsLoading(false)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
   }, [])
 
   const login = async (email: string, password: string) => {
@@ -48,47 +55,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Please enter a valid email')
     }
 
-    // Simulate API call
-    const mockUser: User = {
-      id: '1',
-      email,
-      name: email.split('@')[0],
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+    } catch (error: any) {
+      console.error('Login error:', error)
+      
+      // Provide user-friendly error messages
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        throw new Error('Invalid email or password')
+      } else if (error.code === 'auth/user-not-found') {
+        throw new Error('No account found with this email')
+      } else if (error.code === 'auth/too-many-requests') {
+        throw new Error('Too many failed attempts. Please try again later')
+      } else {
+        throw new Error('Login failed. Please try again')
+      }
     }
-
-    localStorage.setItem('authToken', 'demo-token-' + Date.now())
-    localStorage.setItem('user', JSON.stringify(mockUser))
-    setUser(mockUser)
   }
 
-  const register = async (email: string, password: string, name: string) => {
-    if (!email || !password || !name) {
-      throw new Error('Please fill in all fields')
+  const logout = async () => {
+    try {
+      await signOut(auth)
+    } catch (error) {
+      console.error('Logout error:', error)
+      throw new Error('Failed to logout')
     }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw new Error('Please enter a valid email')
-    }
-
-    if (password.length < 6) {
-      throw new Error('Password must be at least 6 characters')
-    }
-
-    // Simulate API call
-    const mockUser: User = {
-      id: '1',
-      email,
-      name,
-    }
-
-    localStorage.setItem('authToken', 'demo-token-' + Date.now())
-    localStorage.setItem('user', JSON.stringify(mockUser))
-    setUser(mockUser)
-  }
-
-  const logout = () => {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('user')
-    setUser(null)
   }
 
   return (
@@ -98,7 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
-        register,
         logout,
       }}
     >
