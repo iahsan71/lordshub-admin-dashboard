@@ -18,6 +18,7 @@ import {
   addDoc,
   updateDoc,
   doc,
+  getDocs,
   Timestamp,
   serverTimestamp,
   increment,
@@ -26,22 +27,44 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/config/firebase';
 
-// Real-time listener for all chats
+// Real-time listener for all chats (from customer side structure)
 export const subscribeToChats = () => (dispatch: AppDispatch) => {
-  const chatsRef = collection(db, 'chats');
-  const q = query(chatsRef, orderBy('lastMessageTime', 'desc'));
-
+  console.log('🔍 Subscribing to chats at: chatSessions');
+  const chatsRef = collection(db, 'chatSessions');
+  
+  // Listen to all sessions without ordering first (to avoid index issues)
   const unsubscribe = onSnapshot(
-    q,
+    chatsRef,
     (snapshot) => {
-      const chats: Chat[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Chat[];
+      console.log('📨 Received snapshot with', snapshot.docs.length, 'documents');
+      
+      const chats: Chat[] = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          console.log('📄 Chat document:', doc.id, data);
+          return {
+            id: doc.id,
+            conversationId: data.visitorId || doc.id,
+            customerName: data.visitorName || 'Guest',
+            lastMessage: data.lastMessage || '',
+            lastMessageTime: data.updatedAt || data.createdAt || null,
+            unreadCount: data.unreadCount || 0,
+            createdAt: data.createdAt || null,
+          };
+        })
+        .filter((chat) => chat.lastMessageTime) // Filter out chats without timestamps
+        .sort((a, b) => {
+          // Sort by lastMessageTime descending (newest first)
+          if (!a.lastMessageTime) return 1;
+          if (!b.lastMessageTime) return -1;
+          return b.lastMessageTime.toMillis() - a.lastMessageTime.toMillis();
+        }) as Chat[];
+      
+      console.log('✅ Loaded chats:', chats.length, chats);
       dispatch(setChats(chats));
     },
     (error) => {
-      console.error('Error fetching chats:', error);
+      console.error('❌ Error fetching chats:', error);
       dispatch(setError('Failed to load chats'));
     }
   );
@@ -49,22 +72,33 @@ export const subscribeToChats = () => (dispatch: AppDispatch) => {
   return unsubscribe;
 };
 
-// Real-time listener for messages in a specific chat
+// Real-time listener for messages in a specific chat (from customer side structure)
 export const subscribeToMessages = (chatId: string) => (dispatch: AppDispatch) => {
-  const messagesRef = collection(db, 'chats', chatId, 'messages');
+  console.log('💬 Subscribing to messages for chat:', chatId);
+  const messagesRef = collection(db, 'chatSessions', chatId, 'messages');
   const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
   const unsubscribe = onSnapshot(
     q,
     (snapshot) => {
-      const messages: Message[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Message[];
+      console.log('📬 Received', snapshot.docs.length, 'messages for chat:', chatId);
+      const messages: Message[] = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        console.log('💌 Message:', doc.id, data);
+        return {
+          id: doc.id,
+          from: data.sender === 'visitor' ? 'customer' : 'admin',
+          text: data.text || '',
+          type: data.type || 'text',
+          imageUrl: data.imageUrl,
+          timestamp: data.timestamp,
+        };
+      }) as Message[];
+      console.log('✅ Dispatching', messages.length, 'messages');
       dispatch(setMessages({ chatId, messages }));
     },
     (error) => {
-      console.error('Error fetching messages:', error);
+      console.error('❌ Error fetching messages:', error);
       dispatch(setError('Failed to load messages'));
     }
   );
@@ -72,30 +106,33 @@ export const subscribeToMessages = (chatId: string) => (dispatch: AppDispatch) =
   return unsubscribe;
 };
 
-// Send a text message
+// Send a text message (matching customer side structure)
 export const sendMessage =
   (chatId: string, text: string, from: 'admin' | 'customer') =>
   async (dispatch: AppDispatch) => {
     try {
-      const messagesRef = collection(db, 'chats', chatId, 'messages');
-      const chatRef = doc(db, 'chats', chatId);
+      const messagesRef = collection(db, 'chatSessions', chatId, 'messages');
+      const chatRef = doc(db, 'chatSessions', chatId);
 
-      // Add message to subcollection
+      // Add message to subcollection with customer side structure
       await addDoc(messagesRef, {
-        from,
+        sender: from === 'admin' ? 'admin' : 'visitor',
         text,
         type: 'text',
         timestamp: serverTimestamp(),
+        read: false,
       });
 
       // Update chat's last message and timestamp
       const updateData: any = {
         lastMessage: text,
-        lastMessageTime: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
-      // Increment unread count only for customer messages
-      if (from === 'customer') {
+      // Reset unread count when admin sends message
+      if (from === 'admin') {
+        updateData.unreadCount = 0;
+      } else {
         updateData.unreadCount = increment(1);
       }
 
@@ -107,7 +144,7 @@ export const sendMessage =
     }
   };
 
-// Upload and send image message
+// Upload and send image message (matching customer side structure)
 export const sendImageMessage =
   (chatId: string, file: File, from: 'admin' | 'customer') =>
   async (dispatch: AppDispatch) => {
@@ -134,25 +171,28 @@ export const sendImageMessage =
       await uploadBytes(storageRef, file);
       const imageUrl = await getDownloadURL(storageRef);
 
-      // Add message with image
-      const messagesRef = collection(db, 'chats', chatId, 'messages');
-      const chatRef = doc(db, 'chats', chatId);
+      // Add message with image (matching customer side structure)
+      const messagesRef = collection(db, 'chatSessions', chatId, 'messages');
+      const chatRef = doc(db, 'chatSessions', chatId);
 
       await addDoc(messagesRef, {
-        from,
+        sender: from === 'admin' ? 'admin' : 'visitor',
         text: '📷 Image',
         type: 'image',
         imageUrl,
         timestamp: serverTimestamp(),
+        read: false,
       });
 
       // Update chat's last message
       const updateData: any = {
         lastMessage: '📷 Image',
-        lastMessageTime: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
-      if (from === 'customer') {
+      if (from === 'admin') {
+        updateData.unreadCount = 0;
+      } else {
         updateData.unreadCount = increment(1);
       }
 
@@ -167,13 +207,26 @@ export const sendImageMessage =
     }
   };
 
-// Mark chat as read (reset unread count)
+// Mark chat as read (reset unread count) - matching customer side structure
 export const markChatAsRead = (chatId: string) => async (dispatch: AppDispatch) => {
   try {
-    const chatRef = doc(db, 'chats', chatId);
+    const chatRef = doc(db, 'chatSessions', chatId);
     await updateDoc(chatRef, {
       unreadCount: 0,
     });
+    
+    // Mark all messages as read
+    const messagesRef = collection(db, 'chatSessions', chatId, 'messages');
+    const messagesSnapshot = await getDocs(messagesRef);
+    
+    const batch = writeBatch(db);
+    messagesSnapshot.docs.forEach((messageDoc) => {
+      if (!messageDoc.data().read) {
+        batch.update(messageDoc.ref, { read: true });
+      }
+    });
+    await batch.commit();
+    
     dispatch(resetUnreadCount(chatId));
   } catch (error) {
     console.error('Error marking chat as read:', error);
