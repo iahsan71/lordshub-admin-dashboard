@@ -35,7 +35,10 @@ export default function App() {
             <Route path="accounts/open" element={<AccountsPage type="open" />} />
             <Route path="gems" element={<GemsPage />} />
             <Route path="diamonds" element={<DiamondsPage />} />
-            <Route path="bots" element={<BotsPage />} />
+            <Route path="bots/war" element={<BotsPage type="war" />} />
+            <Route path="bots/rein" element={<BotsPage type="rein" />} />
+            <Route path="bots/kvk" element={<BotsPage type="kvk" />} />
+            <Route path="bots/farm" element={<BotsPage type="farm" />} />
             <Route path="chat" element={<ChatPage />} />
           </Route>
         </Routes>

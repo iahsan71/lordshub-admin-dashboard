@@ -1,11 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import chatReducer from './slices/chatSlice';
 import accountsReducer from './slices/accountsSlice';
+import diamondsReducer from './slices/diamondsSlice';
+import botsReducer from './slices/botsSlice';
 
 export const store = configureStore({
   reducer: {
     chat: chatReducer,
     accounts: accountsReducer,
+    diamonds: diamondsReducer,
+    bots: botsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -18,8 +22,14 @@ export const store = configureStore({
           'accounts/setAccounts',
           'accounts/addAccount',
           'accounts/updateAccount',
+          'diamonds/setDiamonds',
+          'diamonds/addDiamond',
+          'diamonds/updateDiamond',
+          'bots/setBots',
+          'bots/addBot',
+          'bots/updateBot',
         ],
-        ignoredPaths: ['chat.chats', 'chat.messages', 'accounts.accounts'],
+        ignoredPaths: ['chat.chats', 'chat.messages', 'accounts.accounts', 'diamonds.diamonds', 'bots.bots'],
       },
     }),
 });

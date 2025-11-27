@@ -21,7 +21,16 @@ const navigation = [
       },
       { name: "Gems", href: "/dashboard/gems", icon: "Gem" },
       { name: "Diamonds", href: "/dashboard/diamonds", icon: "Diamond" },
-      { name: "Bots", href: "/dashboard/bots", icon: "Bot" },
+      { 
+        name: "Bots", 
+        icon: "Bot",
+        subItems: [
+          { name: "War Bots", href: "/dashboard/bots/war", icon: "Sword" },
+          { name: "Rein Bots", href: "/dashboard/bots/rein", icon: "Shield" },
+          { name: "KVK Bots", href: "/dashboard/bots/kvk", icon: "Trophy" },
+          { name: "Farm/Bank Bots", href: "/dashboard/bots/farm", icon: "Coins" },
+        ]
+      },
     ]
   },
   { name: "Chat", href: "/dashboard/chat", icon: "MessageSquare" },
@@ -79,6 +88,26 @@ function getIcon(iconName: string) {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     ),
+    Sword: (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 3l-9 9m0 0L3 21m9-9l9 9M3 3l9 9" />
+      </svg>
+    ),
+    Shield: (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
+    Trophy: (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+      </svg>
+    ),
+    Coins: (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
   };
   return icons[iconName] || null;
 }
@@ -92,7 +121,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Products", "Accounts"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Products", "Accounts", "Bots"]);
 
   const toggleExpand = (name: string) => {
     setExpandedItems(prev => 

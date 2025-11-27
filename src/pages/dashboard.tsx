@@ -1,70 +1,123 @@
 import { Link } from "react-router-dom";
+import { useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { subscribeToAccounts } from "@/store/actions/accountsActions";
+import { subscribeToDiamonds } from "@/store/actions/diamondsActions";
+import { subscribeToBots } from "@/store/actions/botsActions";
 
 export default function DashboardPage() {
+  const dispatch = useAppDispatch();
+  const { accounts } = useAppSelector((state) => state.accounts);
+  const { diamonds } = useAppSelector((state) => state.diamonds);
+  const { bots } = useAppSelector((state) => state.bots);
+
+  // Subscribe to all collections
+  useEffect(() => {
+    const unsubAccounts = dispatch(subscribeToAccounts());
+    const unsubDiamonds = dispatch(subscribeToDiamonds());
+    const unsubBots = dispatch(subscribeToBots());
+
+    return () => {
+      if (unsubAccounts) unsubAccounts();
+      if (unsubDiamonds) unsubDiamonds();
+      if (unsubBots) unsubBots();
+    };
+  }, [dispatch]);
+
+  // Calculate dynamic stats
+  const totalProducts = accounts.length + diamonds.length + bots.length;
+  const restrictedAccounts = accounts.filter(a => a.type === 'restricted').length;
+  const openAccounts = accounts.filter(a => a.type === 'open').length;
+  const warBots = bots.filter(b => b.type === 'war').length;
+  const reinBots = bots.filter(b => b.type === 'rein').length;
+  const kvkBots = bots.filter(b => b.type === 'kvk').length;
+  const farmBots = bots.filter(b => b.type === 'farm').length;
+
+  // Calculate total revenue
+  const totalRevenue = useMemo(() => {
+    const accountsRevenue = accounts.reduce((sum, acc) => sum + acc.price, 0);
+    const diamondsRevenue = diamonds.reduce((sum, dia) => sum + dia.price, 0);
+    const botsRevenue = bots.reduce((sum, bot) => sum + bot.price, 0);
+    return accountsRevenue + diamondsRevenue + botsRevenue;
+  }, [accounts, diamonds, bots]);
+
+  // Calculate category percentages
+  const categoryStats = useMemo(() => {
+    if (totalProducts === 0) {
+      return [
+        { name: "Accounts", count: 0, percentage: 0, color: "bg-blue-500" },
+        { name: "Diamonds", count: 0, percentage: 0, color: "bg-yellow-500" },
+        { name: "Bots", count: 0, percentage: 0, color: "bg-green-500" },
+      ];
+    }
+
+    return [
+      { 
+        name: "Accounts", 
+        count: accounts.length, 
+        percentage: Math.round((accounts.length / totalProducts) * 100), 
+        color: "bg-blue-500" 
+      },
+      { 
+        name: "Diamonds", 
+        count: diamonds.length, 
+        percentage: Math.round((diamonds.length / totalProducts) * 100), 
+        color: "bg-yellow-500" 
+      },
+      { 
+        name: "Bots", 
+        count: bots.length, 
+        percentage: Math.round((bots.length / totalProducts) * 100), 
+        color: "bg-green-500" 
+      },
+    ];
+  }, [accounts.length, diamonds.length, bots.length, totalProducts]);
+
   const stats = [
     { 
       id: 1, 
       label: "Total Products", 
-      value: "156", 
-      change: "+12%",
+      value: totalProducts.toString(), 
       icon: "📦",
       color: "from-blue-500 to-cyan-500"
     },
     { 
       id: 2, 
-      label: "Sold Products", 
-      value: "89", 
-      change: "+23%",
-      icon: "✅",
+      label: "Total Accounts", 
+      value: accounts.length.toString(), 
+      icon: "👤",
       color: "from-green-500 to-emerald-500"
     },
     { 
       id: 3, 
-      label: "Pending Payments", 
-      value: "12", 
-      change: "-5%",
-      icon: "⏳",
+      label: "Total Diamonds", 
+      value: diamonds.length.toString(), 
+      icon: "💎",
       color: "from-yellow-500 to-orange-500"
     },
     { 
       id: 4, 
-      label: "Open Chats", 
-      value: "24", 
-      change: "+8%",
-      icon: "💬",
+      label: "Total Bots", 
+      value: bots.length.toString(), 
+      icon: "🤖",
       color: "from-purple-500 to-pink-500"
     },
     { 
       id: 5, 
-      label: "Total Revenue", 
-      value: "$45,231", 
-      change: "+18%",
+      label: "Total Value", 
+      value: `$${totalRevenue.toLocaleString()}`, 
       icon: "💰",
       color: "from-green-600 to-teal-500"
     },
   ];
 
   const quickActions = [
-    { label: "Add New Product", icon: "➕", href: "/dashboard/accounts", color: "from-primary to-blue-600" },
-    { label: "View All Chats", icon: "💬", href: "/dashboard/chat", color: "from-purple-500 to-pink-500" },
-    { label: "Manage Accounts", icon: "👤", href: "/dashboard/accounts", color: "from-green-500 to-emerald-500" },
-    { label: "Manage Gems", icon: "💎", href: "/dashboard/gems", color: "from-purple-600 to-indigo-500" },
-  ];
-
-  const recentActivity = [
-    { id: 1, type: "sale", message: "New sale: Lords Mobile Castle 25", time: "2 min ago", icon: "✅" },
-    { id: 2, type: "chat", message: "New chat from customer #1234", time: "5 min ago", icon: "💬" },
-    { id: 3, type: "payment", message: "Payment verified for Order #5678", time: "12 min ago", icon: "💰" },
-    { id: 4, type: "product", message: "New product added: Free Fire Diamonds", time: "1 hour ago", icon: "📦" },
-  ];
-
-  const categoryStats = [
-    { name: "Accounts", count: 45, percentage: 35, color: "bg-blue-500" },
-    { name: "Diamonds", count: 38, percentage: 30, color: "bg-yellow-500" },
-    { name: "Gems", count: 25, percentage: 20, color: "bg-purple-500" },
-    { name: "Bots", count: 19, percentage: 15, color: "bg-green-500" },
+    { label: "Restricted Accounts", icon: "🔒", href: "/dashboard/accounts/restricted", color: "from-red-500 to-pink-600" },
+    { label: "Open Accounts", icon: "🔓", href: "/dashboard/accounts/open", color: "from-green-500 to-emerald-500" },
+    { label: "Manage Diamonds", icon: "💎", href: "/dashboard/diamonds", color: "from-yellow-500 to-orange-500" },
+    { label: "Manage Bots", icon: "🤖", href: "/dashboard/bots/war", color: "from-purple-500 to-indigo-500" },
   ];
 
   return (
@@ -88,14 +141,11 @@ export default function DashboardPage() {
           >
             <CardContent className="pt-6">
               <div className={`bg-gradient-to-r ${stat.color} p-4 rounded-lg text-white`}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-3xl">{stat.icon}</span>
-                  <span className="text-sm font-semibold bg-white/20 px-2 py-1 rounded">
-                    {stat.change}
-                  </span>
+                <div className="flex items-center justify-center mb-2">
+                  <span className="text-4xl">{stat.icon}</span>
                 </div>
-                <p className="text-sm opacity-90">{stat.label}</p>
-                <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                <p className="text-sm opacity-90 text-center">{stat.label}</p>
+                <p className="text-3xl font-bold mt-1 text-center">{stat.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -156,26 +206,60 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* Detailed Breakdown */}
         <Card className="border-primary/20 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Recent Activity</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Product Breakdown</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentActivity.map((activity, idx) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-3 p-3 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg hover:from-primary/10 hover:to-secondary/10 transition-all animate-in fade-in slide-in-from-right-4"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <span className="text-2xl">{activity.icon}</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.message}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
-                  </div>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-lg animate-in fade-in slide-in-from-right-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🔒</span>
+                  <span className="font-medium">Restricted Accounts</span>
                 </div>
-              ))}
+                <span className="text-lg font-bold text-red-500">{restrictedAccounts}</span>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg animate-in fade-in slide-in-from-right-4" style={{ animationDelay: "100ms" }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🔓</span>
+                  <span className="font-medium">Open Accounts</span>
+                </div>
+                <span className="text-lg font-bold text-green-500">{openAccounts}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg animate-in fade-in slide-in-from-right-4" style={{ animationDelay: "200ms" }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">⚔️</span>
+                  <span className="font-medium">War Bots</span>
+                </div>
+                <span className="text-lg font-bold text-blue-500">{warBots}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 rounded-lg animate-in fade-in slide-in-from-right-4" style={{ animationDelay: "300ms" }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🛡️</span>
+                  <span className="font-medium">Rein Bots</span>
+                </div>
+                <span className="text-lg font-bold text-purple-500">{reinBots}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg animate-in fade-in slide-in-from-right-4" style={{ animationDelay: "400ms" }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🏆</span>
+                  <span className="font-medium">KVK Bots</span>
+                </div>
+                <span className="text-lg font-bold text-yellow-500">{kvkBots}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500/10 to-teal-500/10 rounded-lg animate-in fade-in slide-in-from-right-4" style={{ animationDelay: "500ms" }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">💰</span>
+                  <span className="font-medium">Farm/Bank Bots</span>
+                </div>
+                <span className="text-lg font-bold text-green-500">{farmBots}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
