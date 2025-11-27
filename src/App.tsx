@@ -31,7 +31,8 @@ export default function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="products" element={<ProductsPage />} />
-            <Route path="accounts" element={<AccountsPage />} />
+            <Route path="accounts/restricted" element={<AccountsPage type="restricted" />} />
+            <Route path="accounts/open" element={<AccountsPage type="open" />} />
             <Route path="gems" element={<GemsPage />} />
             <Route path="diamonds" element={<DiamondsPage />} />
             <Route path="bots" element={<BotsPage />} />

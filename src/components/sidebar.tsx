@@ -11,7 +11,14 @@ const navigation = [
     name: "Products", 
     icon: "Package",
     subItems: [
-      { name: "Accounts", href: "/dashboard/accounts", icon: "User" },
+      { 
+        name: "Accounts", 
+        icon: "User",
+        subItems: [
+          { name: "Restricted Kingdom", href: "/dashboard/accounts/restricted", icon: "Lock" },
+          { name: "Open Kingdom", href: "/dashboard/accounts/open", icon: "Unlock" },
+        ]
+      },
       { name: "Gems", href: "/dashboard/gems", icon: "Gem" },
       { name: "Diamonds", href: "/dashboard/diamonds", icon: "Diamond" },
       { name: "Bots", href: "/dashboard/bots", icon: "Bot" },
@@ -35,6 +42,16 @@ function getIcon(iconName: string) {
     User: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+    Lock: (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    ),
+    Unlock: (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
       </svg>
     ),
     Gem: (
@@ -75,7 +92,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Products"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Products", "Accounts"]);
 
   const toggleExpand = (name: string) => {
     setExpandedItems(prev => 
@@ -149,6 +166,51 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {isExpanded && (
                     <div className="ml-4 space-y-1 animate-in slide-in-from-top-2">
                       {item.subItems.map((subItem) => {
+                        const hasNestedSubItems = 'subItems' in subItem && subItem.subItems;
+                        const isNestedExpanded = expandedItems.includes(subItem.name);
+                        
+                        if (hasNestedSubItems) {
+                          return (
+                            <div key={subItem.name} className="space-y-1">
+                              <button
+                                onClick={() => toggleExpand(subItem.name)}
+                                className="w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-sidebar-accent/20 text-sidebar-foreground"
+                              >
+                                <div className="flex items-center gap-2">
+                                  {getIcon(subItem.icon)}
+                                  <span>{subItem.name}</span>
+                                </div>
+                                <div className={cn("transition-transform", isNestedExpanded && "rotate-180")}>
+                                  {getIcon("ChevronDown")}
+                                </div>
+                              </button>
+                              {isNestedExpanded && (
+                                <div className="ml-4 space-y-1 animate-in slide-in-from-top-2">
+                                  {subItem.subItems.map((nestedItem) => {
+                                    const isActive = location.pathname === nestedItem.href;
+                                    return (
+                                      <Link
+                                        key={nestedItem.href}
+                                        to={nestedItem.href}
+                                        onClick={handleLinkClick}
+                                        className={cn(
+                                          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                                          isActive
+                                            ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent/20 hover:translate-x-1"
+                                        )}
+                                      >
+                                        {getIcon(nestedItem.icon)}
+                                        <span>{nestedItem.name}</span>
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                        
                         const isActive = location.pathname === subItem.href;
                         return (
                           <Link

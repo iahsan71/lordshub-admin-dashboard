@@ -13,7 +13,11 @@ import {
 } from "@/store/actions/accountsActions";
 import { Account } from "@/store/slices/accountsSlice";
 
-export default function AccountsPage() {
+type AccountsPageProps = {
+  type: 'restricted' | 'open';
+};
+
+export default function AccountsPage({ type }: AccountsPageProps) {
   const dispatch = useAppDispatch();
   const { accounts, loading, uploadingImages } = useAppSelector((state) => state.accounts);
   
@@ -41,8 +45,11 @@ export default function AccountsPage() {
     };
   }, [dispatch]);
 
-  // Filter accounts
+  // Filter accounts by type and search criteria
   const filteredAccounts = accounts.filter((acc) => {
+    // Filter by type
+    if (acc.type !== type) return false;
+    
     const matchesSearch =
       acc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       acc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -147,6 +154,7 @@ export default function AccountsPage() {
             price,
             newImages: selectedImages,
             existingImages,
+            type: type,
           })
         );
       } else {
@@ -157,6 +165,7 @@ export default function AccountsPage() {
             description: formData.description,
             price,
             images: selectedImages,
+            type: type,
           })
         );
       }
@@ -182,17 +191,17 @@ export default function AccountsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Accounts Management
+            {type === 'restricted' ? 'Restricted Kingdom Accounts' : 'Open Kingdom Accounts'}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Manage game accounts inventory
+            Manage {type === 'restricted' ? 'restricted' : 'open'} kingdom accounts inventory
           </p>
         </div>
         <Button
           onClick={openAddModal}
           className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all w-full sm:w-auto"
         >
-          + Add New Account
+          + Add New {type === 'restricted' ? 'Restricted' : 'Open'} Account
         </Button>
       </div>
 
@@ -265,6 +274,15 @@ export default function AccountsPage() {
                   <div className="flex-1">
                     <CardTitle className="text-lg">{account.title}</CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">ID: {account.productId}</p>
+                    <div className="mt-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                        account.type === 'restricted' 
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
+                          : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      }`}>
+                        {account.type === 'restricted' ? '🔒 Restricted' : '🔓 Open'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardHeader>

@@ -8,6 +8,7 @@ export interface Account {
   description: string;
   price: number;
   images: string[];
+  type: 'restricted' | 'open';
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

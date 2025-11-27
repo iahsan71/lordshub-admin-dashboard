@@ -110,6 +110,7 @@ export const addAccount =
     description: string;
     price: number;
     images: File[];
+    type: 'restricted' | 'open';
   }) =>
   async (dispatch: AppDispatch) => {
     try {
@@ -132,6 +133,7 @@ export const addAccount =
         description: data.description,
         price: data.price,
         images: imageUrls,
+        type: data.type,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -171,6 +173,7 @@ export const updateAccount =
       price: number;
       newImages?: File[];
       existingImages: string[];
+      type: 'restricted' | 'open';
     }
   ) =>
   async (dispatch: AppDispatch) => {
@@ -193,6 +196,7 @@ export const updateAccount =
         description: data.description,
         price: data.price,
         images: imageUrls,
+        type: data.type,
         updatedAt: serverTimestamp(),
       });
 
