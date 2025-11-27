@@ -3,6 +3,7 @@ import chatReducer from './slices/chatSlice';
 import accountsReducer from './slices/accountsSlice';
 import diamondsReducer from './slices/diamondsSlice';
 import botsReducer from './slices/botsSlice';
+import offersReducer from './slices/offersSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     accounts: accountsReducer,
     diamonds: diamondsReducer,
     bots: botsReducer,
+    offers: offersReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -28,8 +30,11 @@ export const store = configureStore({
           'bots/setBots',
           'bots/addBot',
           'bots/updateBot',
+          'offers/setOffers',
+          'offers/addOffer',
+          'offers/updateOffer',
         ],
-        ignoredPaths: ['chat.chats', 'chat.messages', 'accounts.accounts', 'diamonds.diamonds', 'bots.bots'],
+        ignoredPaths: ['chat.chats', 'chat.messages', 'accounts.accounts', 'diamonds.diamonds', 'bots.bots', 'offers.offers'],
       },
     }),
 });

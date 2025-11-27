@@ -6,28 +6,32 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { subscribeToAccounts } from "@/store/actions/accountsActions";
 import { subscribeToDiamonds } from "@/store/actions/diamondsActions";
 import { subscribeToBots } from "@/store/actions/botsActions";
+import { subscribeToOffers } from "@/store/actions/offersActions";
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const { accounts } = useAppSelector((state) => state.accounts);
   const { diamonds } = useAppSelector((state) => state.diamonds);
   const { bots } = useAppSelector((state) => state.bots);
+  const { offers } = useAppSelector((state) => state.offers);
 
   // Subscribe to all collections
   useEffect(() => {
     const unsubAccounts = dispatch(subscribeToAccounts());
     const unsubDiamonds = dispatch(subscribeToDiamonds());
     const unsubBots = dispatch(subscribeToBots());
+    const unsubOffers = dispatch(subscribeToOffers());
 
     return () => {
       if (unsubAccounts) unsubAccounts();
       if (unsubDiamonds) unsubDiamonds();
       if (unsubBots) unsubBots();
+      if (unsubOffers) unsubOffers();
     };
   }, [dispatch]);
 
   // Calculate dynamic stats
-  const totalProducts = accounts.length + diamonds.length + bots.length;
+  const totalProducts = accounts.length + diamonds.length + bots.length + offers.length;
   const restrictedAccounts = accounts.filter(a => a.type === 'restricted').length;
   const openAccounts = accounts.filter(a => a.type === 'open').length;
   const warBots = bots.filter(b => b.type === 'war').length;
@@ -50,6 +54,7 @@ export default function DashboardPage() {
         { name: "Accounts", count: 0, percentage: 0, color: "bg-blue-500" },
         { name: "Diamonds", count: 0, percentage: 0, color: "bg-yellow-500" },
         { name: "Bots", count: 0, percentage: 0, color: "bg-green-500" },
+        { name: "Offers", count: 0, percentage: 0, color: "bg-pink-500" },
       ];
     }
 
@@ -72,8 +77,14 @@ export default function DashboardPage() {
         percentage: Math.round((bots.length / totalProducts) * 100), 
         color: "bg-green-500" 
       },
+      { 
+        name: "Offers", 
+        count: offers.length, 
+        percentage: Math.round((offers.length / totalProducts) * 100), 
+        color: "bg-pink-500" 
+      },
     ];
-  }, [accounts.length, diamonds.length, bots.length, totalProducts]);
+  }, [accounts.length, diamonds.length, bots.length, offers.length, totalProducts]);
 
   const stats = [
     { 
@@ -106,6 +117,13 @@ export default function DashboardPage() {
     },
     { 
       id: 5, 
+      label: "Total Offers", 
+      value: offers.length.toString(), 
+      icon: "🎁",
+      color: "from-pink-500 to-rose-500"
+    },
+    { 
+      id: 6, 
       label: "Total Value", 
       value: `$${totalRevenue.toLocaleString()}`, 
       icon: "💰",
@@ -118,6 +136,7 @@ export default function DashboardPage() {
     { label: "Open Accounts", icon: "🔓", href: "/dashboard/accounts/open", color: "from-green-500 to-emerald-500" },
     { label: "Manage Diamonds", icon: "💎", href: "/dashboard/diamonds", color: "from-yellow-500 to-orange-500" },
     { label: "Manage Bots", icon: "🤖", href: "/dashboard/bots/war", color: "from-purple-500 to-indigo-500" },
+    { label: "Manage Offers", icon: "🎁", href: "/dashboard/offers", color: "from-pink-500 to-rose-500" },
   ];
 
   return (
@@ -132,7 +151,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
         {stats.map((stat, idx) => (
           <Card
             key={stat.id}

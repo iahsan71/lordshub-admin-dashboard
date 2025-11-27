@@ -10,6 +10,7 @@ import AccountsPage from "./pages/accounts";
 import GemsPage from "./pages/gems";
 import DiamondsPage from "./pages/diamonds";
 import BotsPage from "./pages/bots";
+import OffersPage from "./pages/offers";
 import { AuthGuard } from "./components/authGuard";
 import DashboardLayout from "./components/dashboardLayout";
 
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="bots/rein" element={<BotsPage type="rein" />} />
             <Route path="bots/kvk" element={<BotsPage type="kvk" />} />
             <Route path="bots/farm" element={<BotsPage type="farm" />} />
+            <Route path="offers" element={<OffersPage />} />
             <Route path="chat" element={<ChatPage />} />
           </Route>
         </Routes>
