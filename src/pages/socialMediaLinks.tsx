@@ -39,7 +39,7 @@ export default function SocialMediaLinksPage() {
       const data = await getSocialMediaLinks();
       setLinks(data);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to fetch social media links");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -95,16 +95,14 @@ export default function SocialMediaLinksPage() {
 
       if (editingId) {
         await updateSocialMediaLink(editingId, payload);
-        alert("Social media link updated successfully");
       } else {
         await addSocialMediaLink(payload);
-        alert("Social media link added successfully");
       }
 
       await fetchLinks();
       handleCloseModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to save social media link");
+      console.error(error);
     } finally {
       setSubmitting(false);
     }
@@ -117,10 +115,9 @@ export default function SocialMediaLinksPage() {
 
     try {
       await deleteSocialMediaLink(id);
-      alert("Social media link deleted successfully");
       await fetchLinks();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to delete social media link");
+      console.error(error);
     }
   };
 
@@ -131,7 +128,9 @@ export default function SocialMediaLinksPage() {
   };
 
   const isFormValid =
-    selectedPlatform && url && (url.startsWith("http://") || url.startsWith("https://"));
+    selectedPlatform &&
+    url &&
+    (url.startsWith("http://") || url.startsWith("https://"));
 
   return (
     <div className="p-6">
@@ -152,16 +151,27 @@ export default function SocialMediaLinksPage() {
           <table className="w-full">
             <thead className="bg-muted">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Platform</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">URL</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Created At</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Platform
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  URL
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Created At
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {links.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                  <td
+                    colSpan={4}
+                    className="px-6 py-8 text-center text-muted-foreground"
+                  >
                     No social media links found. Add one to get started.
                   </td>
                 </tr>

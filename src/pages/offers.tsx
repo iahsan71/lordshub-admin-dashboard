@@ -15,12 +15,12 @@ import { Offer } from "@/store/slices/offersSlice";
 export default function OffersPage() {
   const dispatch = useAppDispatch();
   const { offers, loading } = useAppSelector((state) => state.offers);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -50,7 +50,12 @@ export default function OffersPage() {
   // Open add modal
   const openAddModal = () => {
     setEditingOffer(null);
-    setFormData({ name: "", description: "", mediaFile: null, mediaType: "image" });
+    setFormData({
+      name: "",
+      description: "",
+      mediaFile: null,
+      mediaType: "image",
+    });
     setShowModal(true);
   };
 
@@ -70,7 +75,12 @@ export default function OffersPage() {
   const closeModal = () => {
     setShowModal(false);
     setEditingOffer(null);
-    setFormData({ name: "", description: "", mediaFile: null, mediaType: "image" });
+    setFormData({
+      name: "",
+      description: "",
+      mediaFile: null,
+      mediaType: "image",
+    });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -91,12 +101,10 @@ export default function OffersPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.description) {
-      alert("Please fill in all fields");
       return;
     }
 
     if (!editingOffer && !formData.mediaFile) {
-      alert("Please select a media file");
       return;
     }
 
@@ -125,7 +133,7 @@ export default function OffersPage() {
       }
       closeModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to save offer");
+      console.error(error);
     }
   };
 
@@ -136,7 +144,7 @@ export default function OffersPage() {
     try {
       await dispatch(deleteOffer(offer.id, offer.mediaUrl));
     } catch (error) {
-      alert("Failed to delete offer");
+      console.error(error);
     }
   };
 
@@ -147,7 +155,9 @@ export default function OffersPage() {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Offers Management
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage special offers and promotions</p>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Manage special offers and promotions
+          </p>
         </div>
         <Button
           onClick={openAddModal}
@@ -203,7 +213,9 @@ export default function OffersPage() {
                   <span className="text-4xl">🎁</span>
                   <div className="flex-1">
                     <CardTitle className="text-lg">{offer.name}</CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">ID: {offer.productId}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ID: {offer.productId}
+                    </p>
                   </div>
                 </div>
               </CardHeader>
@@ -225,8 +237,10 @@ export default function OffersPage() {
                   )}
                 </div>
 
-                <p className="text-sm text-muted-foreground line-clamp-2">{offer.description}</p>
-                
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {offer.description}
+                </p>
+
                 <div className="pt-3 border-t border-border">
                   <div className="flex gap-2">
                     <Button
@@ -258,7 +272,9 @@ export default function OffersPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle>{editingOffer ? "Edit Offer" : "Add New Offer"}</CardTitle>
+              <CardTitle>
+                {editingOffer ? "Edit Offer" : "Add New Offer"}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -281,7 +297,9 @@ export default function OffersPage() {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     placeholder="e.g., Black Friday Sale"
                     className="bg-input border-border"
                     required
@@ -293,7 +311,9 @@ export default function OffersPage() {
                   <textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Detailed description of the offer..."
                     className="w-full min-h-[100px] rounded-md border border-border bg-input px-3 py-2 text-foreground resize-y"
                     required
@@ -301,7 +321,9 @@ export default function OffersPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="media">Media (Image/Video) {!editingOffer && "*"}</Label>
+                  <Label htmlFor="media">
+                    Media (Image/Video) {!editingOffer && "*"}
+                  </Label>
                   <Input
                     id="media"
                     ref={fileInputRef}

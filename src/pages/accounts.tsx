@@ -14,19 +14,21 @@ import {
 import { Account } from "@/store/slices/accountsSlice";
 
 type AccountsPageProps = {
-  type: 'restricted' | 'open';
+  type: "restricted" | "open";
 };
 
 export default function AccountsPage({ type }: AccountsPageProps) {
   const dispatch = useAppDispatch();
-  const { accounts, loading, uploadingImages } = useAppSelector((state) => state.accounts);
-  
+  const { accounts, loading, uploadingImages } = useAppSelector(
+    (state) => state.accounts
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -49,7 +51,7 @@ export default function AccountsPage({ type }: AccountsPageProps) {
   const filteredAccounts = accounts.filter((acc) => {
     // Filter by type
     if (acc.type !== type) return false;
-    
+
     const matchesSearch =
       acc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       acc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,10 +86,12 @@ export default function AccountsPage({ type }: AccountsPageProps) {
     if (editingAccount) {
       try {
         const remaining = existingImages.filter((url) => url !== imageUrl);
-        await dispatch(removeImageFromAccount(editingAccount.id, imageUrl, remaining));
+        await dispatch(
+          removeImageFromAccount(editingAccount.id, imageUrl, remaining)
+        );
         setExistingImages(remaining);
       } catch (error) {
-        alert("Failed to remove image");
+        console.error(error);
       }
     } else {
       setExistingImages((prev) => prev.filter((url) => url !== imageUrl));
@@ -134,13 +138,11 @@ export default function AccountsPage({ type }: AccountsPageProps) {
     e.preventDefault();
 
     if (!formData.title || !formData.description || !formData.price) {
-      alert("Please fill in all fields");
       return;
     }
 
     const price = parseFloat(formData.price);
     if (isNaN(price) || price <= 0) {
-      alert("Please enter a valid price");
       return;
     }
 
@@ -171,7 +173,7 @@ export default function AccountsPage({ type }: AccountsPageProps) {
       }
       closeModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to save account");
+      console.error(error);
     }
   };
 
@@ -182,7 +184,7 @@ export default function AccountsPage({ type }: AccountsPageProps) {
     try {
       await dispatch(deleteAccount(account.id, account.images));
     } catch (error) {
-      alert("Failed to delete account");
+      console.error(error);
     }
   };
 
@@ -191,17 +193,20 @@ export default function AccountsPage({ type }: AccountsPageProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            {type === 'restricted' ? 'Restricted Kingdom Accounts' : 'Open Kingdom Accounts'}
+            {type === "restricted"
+              ? "Restricted Kingdom Accounts"
+              : "Open Kingdom Accounts"}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Manage {type === 'restricted' ? 'restricted' : 'open'} kingdom accounts inventory
+            Manage {type === "restricted" ? "restricted" : "open"} kingdom
+            accounts inventory
           </p>
         </div>
         <Button
           onClick={openAddModal}
           className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all w-full sm:w-auto"
         >
-          + Add New {type === 'restricted' ? 'Restricted' : 'Open'} Account
+          + Add New {type === "restricted" ? "Restricted" : "Open"} Account
         </Button>
       </div>
 
@@ -218,7 +223,6 @@ export default function AccountsPage({ type }: AccountsPageProps) {
                 className="bg-input border-border"
               />
             </div>
-           
           </div>
         </CardContent>
       </Card>
@@ -273,25 +277,35 @@ export default function AccountsPage({ type }: AccountsPageProps) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg">{account.title}</CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">ID: {account.productId}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ID: {account.productId}
+                    </p>
                     <div className="mt-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                        account.type === 'restricted' 
-                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
-                          : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                      }`}>
-                        {account.type === 'restricted' ? '🔒 Restricted' : '🔓 Open'}
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          account.type === "restricted"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        }`}
+                      >
+                        {account.type === "restricted"
+                          ? "🔒 Restricted"
+                          : "🔓 Open"}
                       </span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-4 space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">{account.description}</p>
-                
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {account.description}
+                </p>
+
                 <div className="pt-3 border-t border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-secondary">${account.price}</span>
+                    <span className="text-2xl font-bold text-secondary">
+                      ${account.price}
+                    </span>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -323,7 +337,9 @@ export default function AccountsPage({ type }: AccountsPageProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle>{editingAccount ? "Edit Account" : "Add New Account"}</CardTitle>
+              <CardTitle>
+                {editingAccount ? "Edit Account" : "Add New Account"}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -346,7 +362,9 @@ export default function AccountsPage({ type }: AccountsPageProps) {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     placeholder="e.g., Lords Mobile - Castle 25 Account"
                     className="bg-input border-border"
                     required
@@ -358,7 +376,9 @@ export default function AccountsPage({ type }: AccountsPageProps) {
                   <textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Detailed description of the account..."
                     className="w-full min-h-[100px] rounded-md border border-border bg-input px-3 py-2 text-foreground resize-y"
                     required
@@ -372,7 +392,9 @@ export default function AccountsPage({ type }: AccountsPageProps) {
                     type="number"
                     step="0.01"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     placeholder="299.99"
                     className="bg-input border-border"
                     required

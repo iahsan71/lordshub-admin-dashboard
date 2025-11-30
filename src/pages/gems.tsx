@@ -4,7 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/ui/modal";
-import { getGemsByTab, addGem, updateGem, deleteGem, type GemItem } from "@/services/gemsService";
+import {
+  getGemsByTab,
+  addGem,
+  updateGem,
+  deleteGem,
+  type GemItem,
+} from "@/services/gemsService";
 import { Tabs, type TabName } from "@/components/ui/tabs";
 
 export default function GemsPage() {
@@ -14,7 +20,7 @@ export default function GemsPage() {
   const [selectedGem, setSelectedGem] = useState<GemItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
   // Add Item Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [itemName, setItemName] = useState("");
@@ -72,17 +78,16 @@ export default function GemsPage() {
     setSubmitting(true);
     try {
       await deleteGem(selectedGem.id);
-      
+
       // Close modal
       setShowDeleteConfirm(false);
       setSelectedGem(null);
-      
+
       // Refresh the list
       const items = await getGemsByTab(activeTab);
       setGems(items);
     } catch (error) {
       console.error("Failed to delete gem:", error);
-      alert("Failed to delete item. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -95,27 +100,25 @@ export default function GemsPage() {
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!itemName.trim() || !quantity) {
-      alert("Please fill in all fields");
       return;
     }
 
     setSubmitting(true);
     try {
       await addGem(itemName.trim(), Number(quantity), activeTab);
-      
+
       // Reset form
       setItemName("");
       setQuantity("");
       setShowAddModal(false);
-      
+
       // Refresh the list
       const items = await getGemsByTab(activeTab);
       setGems(items);
     } catch (error) {
       console.error("Failed to add gem:", error);
-      alert("Failed to add item. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -129,28 +132,30 @@ export default function GemsPage() {
 
   const handleUpdateItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedGem || !editItemName.trim() || !editQuantity) {
-      alert("Please fill in all fields");
       return;
     }
 
     setSubmitting(true);
     try {
-      await updateGem(selectedGem.id, editItemName.trim(), Number(editQuantity));
-      
+      await updateGem(
+        selectedGem.id,
+        editItemName.trim(),
+        Number(editQuantity)
+      );
+
       // Close modal
       setShowEditModal(false);
       setSelectedGem(null);
       setEditItemName("");
       setEditQuantity("");
-      
+
       // Refresh the list
       const items = await getGemsByTab(activeTab);
       setGems(items);
     } catch (error) {
       console.error("Failed to update gem:", error);
-      alert("Failed to update item. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -170,9 +175,11 @@ export default function GemsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Gems Management
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage gems packages and pricing</p>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Manage gems packages and pricing
+          </p>
         </div>
-        <Button 
+        <Button
           onClick={() => setShowAddModal(true)}
           className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all w-full sm:w-auto"
         >
@@ -217,7 +224,9 @@ export default function GemsPage() {
           </div>
         ) : gems.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground text-lg">No gems found for this tab.</p>
+            <p className="text-muted-foreground text-lg">
+              No gems found for this tab.
+            </p>
           </div>
         ) : (
           gems.map((gem, idx) => (
@@ -231,9 +240,12 @@ export default function GemsPage() {
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="text-3xl">💎</span>
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base truncate">{gem.itemName}</CardTitle>
+                      <CardTitle className="text-base truncate">
+                        {gem.itemName}
+                      </CardTitle>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Qty: <span className="font-semibold">{gem.quantity}</span>
+                        Qty:{" "}
+                        <span className="font-semibold">{gem.quantity}</span>
                       </p>
                     </div>
                   </div>
@@ -242,7 +254,9 @@ export default function GemsPage() {
               <CardContent className="pt-4 space-y-3">
                 {/* Tab Name Badge */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Category:</span>
+                  <span className="text-xs text-muted-foreground">
+                    Category:
+                  </span>
                   <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary">
                     {gem.tabName}
                   </span>
@@ -251,15 +265,17 @@ export default function GemsPage() {
                 {/* Created Date */}
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Created:</span>
-                  <span className="font-medium">{formatDate(gem.createdAt)}</span>
+                  <span className="font-medium">
+                    {formatDate(gem.createdAt)}
+                  </span>
                 </div>
 
                 {/* Image if available */}
                 {gem.imageUrl && (
                   <div className="rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10">
-                    <img 
-                      src={gem.imageUrl} 
-                      alt={gem.itemName} 
+                    <img
+                      src={gem.imageUrl}
+                      alt={gem.itemName}
                       className="w-full h-32 object-cover"
                     />
                   </div>
@@ -267,17 +283,17 @@ export default function GemsPage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2 border-t border-border">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
+                  <Button
+                    size="sm"
+                    variant="outline"
                     className="flex-1 border-primary/50 hover:bg-primary/10"
                     onClick={() => handleEdit(gem)}
                   >
                     Edit
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
+                  <Button
+                    size="sm"
+                    variant="outline"
                     className="flex-1 border-destructive/50 hover:bg-destructive/10 text-destructive"
                     onClick={() => handleDelete(gem)}
                   >
@@ -291,7 +307,11 @@ export default function GemsPage() {
       </div>
 
       {/* Add Item Modal */}
-      <Modal open={showAddModal} onClose={handleCloseAddModal} title="Add New Gem Item">
+      <Modal
+        open={showAddModal}
+        onClose={handleCloseAddModal}
+        title="Add New Gem Item"
+      >
         <form onSubmit={handleAddItem} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="itemName">Item Name</Label>
@@ -322,7 +342,8 @@ export default function GemsPage() {
 
           <div className="bg-muted p-3 rounded-md">
             <p className="text-sm text-muted-foreground">
-              Category: <span className="font-semibold text-foreground">{activeTab}</span>
+              Category:{" "}
+              <span className="font-semibold text-foreground">{activeTab}</span>
             </p>
           </div>
 
@@ -348,7 +369,11 @@ export default function GemsPage() {
       </Modal>
 
       {/* Edit Item Modal */}
-      <Modal open={showEditModal} onClose={handleCloseEditModal} title="Edit Gem Item">
+      <Modal
+        open={showEditModal}
+        onClose={handleCloseEditModal}
+        title="Edit Gem Item"
+      >
         <form onSubmit={handleUpdateItem} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="editItemName">Item Name</Label>
@@ -380,7 +405,10 @@ export default function GemsPage() {
           {selectedGem && (
             <div className="bg-muted p-3 rounded-md">
               <p className="text-sm text-muted-foreground">
-                Category: <span className="font-semibold text-foreground">{selectedGem.tabName}</span>
+                Category:{" "}
+                <span className="font-semibold text-foreground">
+                  {selectedGem.tabName}
+                </span>
               </p>
             </div>
           )}
@@ -407,7 +435,11 @@ export default function GemsPage() {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal open={showDeleteConfirm} onClose={handleCloseDeleteConfirm} title="Delete Gem Item">
+      <Modal
+        open={showDeleteConfirm}
+        onClose={handleCloseDeleteConfirm}
+        title="Delete Gem Item"
+      >
         <div className="space-y-4">
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
             <p className="text-sm text-foreground">
@@ -417,7 +449,8 @@ export default function GemsPage() {
               <div className="mt-3 space-y-1">
                 <p className="text-sm font-semibold">{selectedGem.itemName}</p>
                 <p className="text-xs text-muted-foreground">
-                  Quantity: {selectedGem.quantity} • Category: {selectedGem.tabName}
+                  Quantity: {selectedGem.quantity} • Category:{" "}
+                  {selectedGem.tabName}
                 </p>
               </div>
             )}
