@@ -36,6 +36,7 @@ const navigation = [
   },
   { name: "Social Media Links", href: "/dashboard/social-media-links", icon: "Link" },
   { name: "Chat", href: "/dashboard/chat", icon: "MessageSquare" },
+  { name: "Settings", href: "/dashboard/settings", icon: "Settings" },
 ];
 
 function getIcon(iconName: string) {
@@ -120,6 +121,12 @@ function getIcon(iconName: string) {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
       </svg>
     ),
+    Settings: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
   };
   return icons[iconName] || null;
 }
@@ -152,12 +159,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     <>
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 ease-in-out",
+          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 ease-in-out h-screen overflow-hidden",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Header */}
-        <div className="p-6 border-b border-sidebar-border">
+        <div className="px-6 py-3 border-b border-sidebar-border flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -167,7 +174,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
               <div>
                 <span className="font-bold text-sidebar-foreground block">Lords Hub</span>
-                <span className="text-xs text-muted-foreground">Admin Panel</span>
               </div>
             </div>
             {/* Close button for mobile */}
@@ -184,7 +190,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-accent scrollbar-track-transparent">
           {navigation.map((item) => {
             const hasSubItems = 'subItems' in item && item.subItems;
             const isExpanded = expandedItems.includes(item.name);
@@ -297,7 +303,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Logout Button */}
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border flex-shrink-0">
           <button
             onClick={() => setShowLogoutModal(true)}
             className="w-full px-4 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-destructive to-destructive/80 text-white hover:shadow-lg transition-all"

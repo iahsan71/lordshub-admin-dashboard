@@ -14,6 +14,7 @@ import DiamondsPage from "./pages/diamonds";
 import BotsPage from "./pages/bots";
 import OffersPage from "./pages/offers";
 import SocialMediaLinksPage from "./pages/socialMediaLinks";
+import SettingsPage from "./pages/settings";
 import { AuthGuard } from "./components/authGuard";
 import DashboardLayout from "./components/dashboardLayout";
 
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="offers" element={<OffersPage />} />
             <Route path="social-media-links" element={<SocialMediaLinksPage />} />
             <Route path="chat" element={<ChatPage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>
       </AuthProvider>

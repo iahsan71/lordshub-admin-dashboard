@@ -15,6 +15,8 @@ export interface Chat {
   conversationId: string;
   customerName: string;
   lastMessage: string;
+  lastMessageType?: 'text' | 'image';
+  lastMessageImageUrl?: string;
   lastMessageTime: Timestamp;
   unreadCount: number;
   createdAt: Timestamp;

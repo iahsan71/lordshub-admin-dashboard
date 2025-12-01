@@ -7,7 +7,7 @@ export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -20,9 +20,9 @@ export function DashboardLayout() {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <Outlet />
         </main>
       </div>

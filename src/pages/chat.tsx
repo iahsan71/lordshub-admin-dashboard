@@ -179,7 +179,18 @@ export default function ChatPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || "No messages yet"}</p>
+                    {chat.lastMessageType === "image" && chat.lastMessageImageUrl ? (
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={chat.lastMessageImageUrl} 
+                          alt="Preview" 
+                          className="w-12 h-12 rounded object-cover border border-border"
+                        />
+                        <p className="text-sm text-muted-foreground truncate flex-1">{chat.lastMessage}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || "No messages yet"}</p>
+                    )}
                   </div>
                 ))
               )}
@@ -223,7 +234,7 @@ export default function ChatPage() {
                       >
                         <div className={`max-w-[70%] ${m.from === "admin" ? "order-2" : "order-1"}`}>
                           <div
-                            className={`px-4 py-3 rounded-2xl ${
+                            className={`px-4 py-3 rounded-2xl break-words ${
                               m.from === "admin"
                                 ? "bg-gradient-to-r from-primary to-secondary text-white rounded-br-none"
                                 : "bg-card border border-border rounded-bl-none"
@@ -234,13 +245,14 @@ export default function ChatPage() {
                                 <img
                                   src={m.imageUrl}
                                   alt="Uploaded"
-                                  className="rounded-lg max-w-full h-auto mb-2"
+                                  className="rounded-lg max-w-full h-auto mb-2 cursor-pointer hover:opacity-90 transition-opacity"
                                   style={{ maxHeight: "300px" }}
+                                  onClick={() => window.open(m.imageUrl, '_blank')}
                                 />
-                                <p className="text-sm">{m.text}</p>
+                                {m.text && <p className="text-sm break-words">{m.text}</p>}
                               </div>
                             ) : (
-                              <p className="text-sm">{m.text}</p>
+                              <p className="text-sm break-words whitespace-pre-wrap">{m.text}</p>
                             )}
                           </div>
                           <p

@@ -52,6 +52,8 @@ export const subscribeToChats = () => (dispatch: AppDispatch) => {
             conversationId: data.visitorId || doc.id,
             customerName: data.visitorName || "Guest",
             lastMessage: data.lastMessage || "",
+            lastMessageType: data.lastMessageType || "text",
+            lastMessageImageUrl: data.lastMessageImageUrl,
             lastMessageTime: data.updatedAt || data.createdAt || null,
             unreadCount: data.unreadCount || 0,
             createdAt: data.createdAt || null,
@@ -137,6 +139,8 @@ export const sendMessage =
       // Update chat's last message and timestamp
       const updateData: any = {
         lastMessage: text,
+        lastMessageType: "text",
+        lastMessageImageUrl: null,
         updatedAt: serverTimestamp(),
       };
 
@@ -148,7 +152,6 @@ export const sendMessage =
       }
 
       await updateDoc(chatRef, updateData);
-      toast.success("Message sent");
     } catch (error) {
       console.error("Error sending message:", error);
       dispatch(setError("Failed to send message"));
@@ -206,6 +209,8 @@ export const sendImageMessage =
       // Update chat's last message
       const updateData: any = {
         lastMessage: "📷 Image",
+        lastMessageType: "image",
+        lastMessageImageUrl: imageUrl,
         updatedAt: serverTimestamp(),
       };
 
@@ -218,7 +223,6 @@ export const sendImageMessage =
       await updateDoc(chatRef, updateData);
 
       dispatch(setUploadingImage(false));
-      toast.success("Image message sent");
     } catch (error) {
       console.error("Error sending image:", error);
       dispatch(setUploadingImage(false));
