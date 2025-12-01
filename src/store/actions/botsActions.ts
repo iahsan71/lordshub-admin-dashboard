@@ -1,4 +1,4 @@
-import { AppDispatch } from '../index';
+import { AppDispatch } from "../index";
 import {
   setBots,
   addBot as addBotToState,
@@ -7,7 +7,7 @@ import {
   setLoading,
   setError,
   Bot,
-} from '../slices/botsSlice';
+} from "../slices/botsSlice";
 import {
   collection,
   query,
@@ -18,13 +18,14 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '@/config/firebase';
+} from "firebase/firestore";
+import { db } from "@/config/firebase";
+import { toast } from "react-toastify";
 
 // Real-time listener for all bots
 export const subscribeToBots = () => (dispatch: AppDispatch) => {
-  const botsRef = collection(db, 'bots');
-  const q = query(botsRef, orderBy('createdAt', 'desc'));
+  const botsRef = collection(db, "bots");
+  const q = query(botsRef, orderBy("createdAt", "desc"));
 
   const unsubscribe = onSnapshot(
     q,
@@ -37,8 +38,8 @@ export const subscribeToBots = () => (dispatch: AppDispatch) => {
       dispatch(setLoading(false));
     },
     (error) => {
-      console.error('Error fetching bots:', error);
-      dispatch(setError('Failed to load bots'));
+      console.error("Error fetching bots:", error);
+      dispatch(setError("Failed to load bots"));
       dispatch(setLoading(false));
     }
   );
@@ -60,7 +61,7 @@ export const addBot =
     description: string;
     features: string[];
     price: number;
-    type: 'war' | 'rein' | 'kvk' | 'farm';
+    type: "war" | "rein" | "kvk" | "farm";
   }) =>
   async (dispatch: AppDispatch) => {
     try {
@@ -70,7 +71,7 @@ export const addBot =
       const productId = generateProductId();
 
       // Add bot to Firestore
-      const botsRef = collection(db, 'bots');
+      const botsRef = collection(db, "bots");
       const docRef = await addDoc(botsRef, {
         productId,
         name: data.name,
@@ -83,21 +84,26 @@ export const addBot =
       });
 
       dispatch(setLoading(false));
-      
+      toast.success("Bot added");
       return docRef.id;
     } catch (error) {
-      console.error('Error adding bot:', error);
+      console.error("Error adding bot:", error);
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to add bot';
+
+      let errorMessage = "Failed to add bot";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
@@ -113,7 +119,7 @@ export const updateBot =
       description: string;
       features: string[];
       price: number;
-      type: 'war' | 'rein' | 'kvk' | 'farm';
+      type: "war" | "rein" | "kvk" | "farm";
     }
   ) =>
   async (dispatch: AppDispatch) => {
@@ -121,7 +127,7 @@ export const updateBot =
       dispatch(setLoading(true));
 
       // Update bot in Firestore
-      const botRef = doc(db, 'bots', botId);
+      const botRef = doc(db, "bots", botId);
       await updateDoc(botRef, {
         name: data.name,
         description: data.description,
@@ -132,19 +138,25 @@ export const updateBot =
       });
 
       dispatch(setLoading(false));
+      toast.success("Bot updated");
     } catch (error) {
-      console.error('Error updating bot:', error);
+      console.error("Error updating bot:", error);
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to update bot';
+
+      let errorMessage = "Failed to update bot";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
@@ -156,15 +168,19 @@ export const deleteBot = (botId: string) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
 
     // Delete bot from Firestore
-    const botRef = doc(db, 'bots', botId);
+    const botRef = doc(db, "bots", botId);
     await deleteDoc(botRef);
 
     dispatch(deleteBotFromState(botId));
     dispatch(setLoading(false));
+    toast.success("Bot deleted");
   } catch (error) {
-    console.error('Error deleting bot:', error);
+    console.error("Error deleting bot:", error);
     dispatch(setLoading(false));
-    dispatch(setError(error instanceof Error ? error.message : 'Failed to delete bot'));
+    const message =
+      error instanceof Error ? error.message : "Failed to delete bot";
+    toast.error(message);
+    dispatch(setError(message));
     throw error;
   }
 };
