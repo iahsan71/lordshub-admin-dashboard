@@ -1,4 +1,4 @@
-import { AppDispatch } from '../index';
+import { AppDispatch } from "../index";
 import {
   setAccounts,
   addAccount as addAccountToState,
@@ -8,7 +8,7 @@ import {
   setError,
   setUploadingImages,
   Account,
-} from '../slices/accountsSlice';
+} from "../slices/accountsSlice";
 import {
   collection,
   query,
@@ -19,14 +19,20 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '@/config/firebase';
+} from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { db, storage } from "@/config/firebase";
+import { toast } from "react-toastify";
 
 // Real-time listener for all accounts
 export const subscribeToAccounts = () => (dispatch: AppDispatch) => {
-  const accountsRef = collection(db, 'accounts');
-  const q = query(accountsRef, orderBy('createdAt', 'desc'));
+  const accountsRef = collection(db, "accounts");
+  const q = query(accountsRef, orderBy("createdAt", "desc"));
 
   const unsubscribe = onSnapshot(
     q,
@@ -39,8 +45,8 @@ export const subscribeToAccounts = () => (dispatch: AppDispatch) => {
       dispatch(setLoading(false));
     },
     (error) => {
-      console.error('Error fetching accounts:', error);
-      dispatch(setError('Failed to load accounts'));
+      console.error("Error fetching accounts:", error);
+      dispatch(setError("Failed to load accounts"));
       dispatch(setLoading(false));
     }
   );
@@ -49,7 +55,10 @@ export const subscribeToAccounts = () => (dispatch: AppDispatch) => {
 };
 
 // Upload multiple images to Firebase Storage
-const uploadImages = async (files: File[], productId: string): Promise<string[]> => {
+const uploadImages = async (
+  files: File[],
+  productId: string
+): Promise<string[]> => {
   const uploadPromises = files.map(async (file, index) => {
     // Validate file
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -57,19 +66,27 @@ const uploadImages = async (files: File[], productId: string): Promise<string[]>
       throw new Error(`Image ${file.name} is too large. Max size is 5MB`);
     }
 
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!allowedTypes.includes(file.type)) {
-      throw new Error(`Image ${file.name} has invalid format. Only JPG, PNG, GIF, and WEBP are allowed`);
+      throw new Error(
+        `Image ${file.name} has invalid format. Only JPG, PNG, GIF, and WEBP are allowed`
+      );
     }
 
     // Upload to Storage
     const timestamp = Date.now();
     const fileName = `${productId}_${timestamp}_${index}_${file.name}`;
     const storageRef = ref(storage, `account-images/${fileName}`);
-    
+
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
-    
+
     return downloadURL;
   });
 
@@ -81,14 +98,14 @@ const deleteImages = async (imageUrls: string[]) => {
   const deletePromises = imageUrls.map(async (url) => {
     try {
       // Extract file path from URL
-      const urlParts = url.split('/o/');
+      const urlParts = url.split("/o/");
       if (urlParts.length > 1) {
-        const filePath = decodeURIComponent(urlParts[1].split('?')[0]);
+        const filePath = decodeURIComponent(urlParts[1].split("?")[0]);
         const storageRef = ref(storage, filePath);
         await deleteObject(storageRef);
       }
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error("Error deleting image:", error);
       // Continue even if one image fails to delete
     }
   });
@@ -110,7 +127,7 @@ export const addAccount =
     description: string;
     price: number;
     images: File[];
-    type: 'restricted' | 'open';
+    type: "restricted" | "open";
   }) =>
   async (dispatch: AppDispatch) => {
     try {
@@ -121,12 +138,13 @@ export const addAccount =
       const productId = generateProductId();
 
       // Upload images first
-      const imageUrls = data.images.length > 0 
-        ? await uploadImages(data.images, productId)
-        : [];
+      const imageUrls =
+        data.images.length > 0
+          ? await uploadImages(data.images, productId)
+          : [];
 
       // Add account to Firestore
-      const accountsRef = collection(db, 'accounts');
+      const accountsRef = collection(db, "accounts");
       const docRef = await addDoc(accountsRef, {
         productId,
         title: data.title,
@@ -140,23 +158,28 @@ export const addAccount =
 
       dispatch(setUploadingImages(false));
       dispatch(setLoading(false));
-      
+      toast.success("Account added");
       return docRef.id;
     } catch (error) {
-      console.error('Error adding account:', error);
+      console.error("Error adding account:", error);
       dispatch(setUploadingImages(false));
       dispatch(setLoading(false));
-      
+
       // Provide more specific error messages
-      let errorMessage = 'Failed to add account';
+      let errorMessage = "Failed to add account";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
@@ -173,7 +196,7 @@ export const updateAccount =
       price: number;
       newImages?: File[];
       existingImages: string[];
-      type: 'restricted' | 'open';
+      type: "restricted" | "open";
     }
   ) =>
   async (dispatch: AppDispatch) => {
@@ -190,7 +213,7 @@ export const updateAccount =
       }
 
       // Update account in Firestore
-      const accountRef = doc(db, 'accounts', accountId);
+      const accountRef = doc(db, "accounts", accountId);
       await updateDoc(accountRef, {
         title: data.title,
         description: data.description,
@@ -202,48 +225,59 @@ export const updateAccount =
 
       dispatch(setUploadingImages(false));
       dispatch(setLoading(false));
+      toast.success("Account updated");
     } catch (error) {
-      console.error('Error updating account:', error);
+      console.error("Error updating account:", error);
       dispatch(setUploadingImages(false));
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to update account';
+
+      let errorMessage = "Failed to update account";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
   };
 
 // Delete account
-export const deleteAccount = (accountId: string, imageUrls: string[]) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(setLoading(true));
+export const deleteAccount =
+  (accountId: string, imageUrls: string[]) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setLoading(true));
 
-    // Delete images from Storage
-    if (imageUrls.length > 0) {
-      await deleteImages(imageUrls);
+      // Delete images from Storage
+      if (imageUrls.length > 0) {
+        await deleteImages(imageUrls);
+      }
+
+      // Delete account from Firestore
+      const accountRef = doc(db, "accounts", accountId);
+      await deleteDoc(accountRef);
+
+      dispatch(deleteAccountFromState(accountId));
+      dispatch(setLoading(false));
+      toast.success("Account deleted");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      dispatch(setLoading(false));
+      const message =
+        error instanceof Error ? error.message : "Failed to delete account";
+      toast.error(message);
+      dispatch(setError(message));
+      throw error;
     }
-
-    // Delete account from Firestore
-    const accountRef = doc(db, 'accounts', accountId);
-    await deleteDoc(accountRef);
-
-    dispatch(deleteAccountFromState(accountId));
-    dispatch(setLoading(false));
-  } catch (error) {
-    console.error('Error deleting account:', error);
-    dispatch(setLoading(false));
-    dispatch(setError(error instanceof Error ? error.message : 'Failed to delete account'));
-    throw error;
-  }
-};
+  };
 
 // Remove a single image from an account
 export const removeImageFromAccount =
@@ -254,14 +288,19 @@ export const removeImageFromAccount =
       await deleteImages([imageUrl]);
 
       // Update account in Firestore
-      const accountRef = doc(db, 'accounts', accountId);
+      const accountRef = doc(db, "accounts", accountId);
       await updateDoc(accountRef, {
         images: remainingImages,
         updatedAt: serverTimestamp(),
       });
+      toast.success("Image removed from account");
     } catch (error) {
-      console.error('Error removing image:', error);
-      dispatch(setError(error instanceof Error ? error.message : 'Failed to remove image'));
+      console.error("Error removing image:", error);
+      dispatch(
+        setError(
+          error instanceof Error ? error.message : "Failed to remove image"
+        )
+      );
       throw error;
     }
   };

@@ -1,4 +1,4 @@
-import { AppDispatch } from '../index';
+import { AppDispatch } from "../index";
 import {
   setDiamonds,
   addDiamond as addDiamondToState,
@@ -7,7 +7,7 @@ import {
   setLoading,
   setError,
   Diamond,
-} from '../slices/diamondsSlice';
+} from "../slices/diamondsSlice";
 import {
   collection,
   query,
@@ -18,13 +18,14 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '@/config/firebase';
+} from "firebase/firestore";
+import { db } from "@/config/firebase";
+import { toast } from "react-toastify";
 
 // Real-time listener for all diamonds
 export const subscribeToDiamonds = () => (dispatch: AppDispatch) => {
-  const diamondsRef = collection(db, 'diamonds');
-  const q = query(diamondsRef, orderBy('createdAt', 'desc'));
+  const diamondsRef = collection(db, "diamonds");
+  const q = query(diamondsRef, orderBy("createdAt", "desc"));
 
   const unsubscribe = onSnapshot(
     q,
@@ -37,8 +38,8 @@ export const subscribeToDiamonds = () => (dispatch: AppDispatch) => {
       dispatch(setLoading(false));
     },
     (error) => {
-      console.error('Error fetching diamonds:', error);
-      dispatch(setError('Failed to load diamonds'));
+      console.error("Error fetching diamonds:", error);
+      dispatch(setError("Failed to load diamonds"));
       dispatch(setLoading(false));
     }
   );
@@ -55,11 +56,7 @@ const generateProductId = (): string => {
 
 // Add new diamond
 export const addDiamond =
-  (data: {
-    name: string;
-    description: string;
-    price: number;
-  }) =>
+  (data: { name: string; description: string; price: number }) =>
   async (dispatch: AppDispatch) => {
     try {
       dispatch(setLoading(true));
@@ -68,7 +65,7 @@ export const addDiamond =
       const productId = generateProductId();
 
       // Add diamond to Firestore
-      const diamondsRef = collection(db, 'diamonds');
+      const diamondsRef = collection(db, "diamonds");
       const docRef = await addDoc(diamondsRef, {
         productId,
         name: data.name,
@@ -79,21 +76,26 @@ export const addDiamond =
       });
 
       dispatch(setLoading(false));
-      
+      toast.success("Diamond added");
       return docRef.id;
     } catch (error) {
-      console.error('Error adding diamond:', error);
+      console.error("Error adding diamond:", error);
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to add diamond';
+
+      let errorMessage = "Failed to add diamond";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
@@ -115,7 +117,7 @@ export const updateDiamond =
       dispatch(setLoading(true));
 
       // Update diamond in Firestore
-      const diamondRef = doc(db, 'diamonds', diamondId);
+      const diamondRef = doc(db, "diamonds", diamondId);
       await updateDoc(diamondRef, {
         name: data.name,
         description: data.description,
@@ -124,39 +126,50 @@ export const updateDiamond =
       });
 
       dispatch(setLoading(false));
+      toast.success("Diamond updated");
     } catch (error) {
-      console.error('Error updating diamond:', error);
+      console.error("Error updating diamond:", error);
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to update diamond';
+
+      let errorMessage = "Failed to update diamond";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
   };
 
 // Delete diamond
-export const deleteDiamond = (diamondId: string) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(setLoading(true));
+export const deleteDiamond =
+  (diamondId: string) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setLoading(true));
 
-    // Delete diamond from Firestore
-    const diamondRef = doc(db, 'diamonds', diamondId);
-    await deleteDoc(diamondRef);
+      // Delete diamond from Firestore
+      const diamondRef = doc(db, "diamonds", diamondId);
+      await deleteDoc(diamondRef);
 
-    dispatch(deleteDiamondFromState(diamondId));
-    dispatch(setLoading(false));
-  } catch (error) {
-    console.error('Error deleting diamond:', error);
-    dispatch(setLoading(false));
-    dispatch(setError(error instanceof Error ? error.message : 'Failed to delete diamond'));
-    throw error;
-  }
-};
+      dispatch(deleteDiamondFromState(diamondId));
+      dispatch(setLoading(false));
+      toast.success("Diamond deleted");
+    } catch (error) {
+      console.error("Error deleting diamond:", error);
+      dispatch(setLoading(false));
+      const message =
+        error instanceof Error ? error.message : "Failed to delete diamond";
+      toast.error(message);
+      dispatch(setError(message));
+      throw error;
+    }
+  };

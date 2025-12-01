@@ -13,24 +13,24 @@ import {
 import { Bot } from "@/store/slices/botsSlice";
 
 type BotsPageProps = {
-  type: 'war' | 'rein' | 'kvk' | 'farm';
+  type: "war" | "rein" | "kvk" | "farm";
 };
 
 const botTypeLabels = {
-  war: 'War Bots',
-  rein: 'Rein Bots',
-  kvk: 'KVK Bots',
-  farm: 'Farm/Bank Bots',
+  war: "War Bots",
+  rein: "Rein Bots",
+  kvk: "KVK Bots",
+  farm: "Farm/Bank Bots",
 };
 
 export default function BotsPage({ type }: BotsPageProps) {
   const dispatch = useAppDispatch();
   const { bots, loading } = useAppSelector((state) => state.bots);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingBot, setEditingBot] = useState<Bot | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -50,7 +50,7 @@ export default function BotsPage({ type }: BotsPageProps) {
   // Filter bots by type and search
   const filteredBots = bots.filter((bot) => {
     if (bot.type !== type) return false;
-    
+
     const matchesSearch =
       bot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bot.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,20 +110,17 @@ export default function BotsPage({ type }: BotsPageProps) {
     e.preventDefault();
 
     if (!formData.name || !formData.description || !formData.price) {
-      alert("Please fill in all required fields");
       return;
     }
 
     const price = parseFloat(formData.price);
     if (isNaN(price) || price <= 0) {
-      alert("Please enter a valid price");
       return;
     }
 
     // Filter out empty features
-    const features = formData.features.filter(f => f.trim() !== "");
+    const features = formData.features.filter((f) => f.trim() !== "");
     if (features.length === 0) {
-      alert("Please add at least one feature");
       return;
     }
 
@@ -153,7 +150,7 @@ export default function BotsPage({ type }: BotsPageProps) {
       }
       closeModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to save bot");
+      console.error(error);
     }
   };
 
@@ -164,7 +161,7 @@ export default function BotsPage({ type }: BotsPageProps) {
     try {
       await dispatch(deleteBot(bot.id));
     } catch (error) {
-      alert("Failed to delete bot");
+      console.error(error);
     }
   };
 
@@ -233,16 +230,22 @@ export default function BotsPage({ type }: BotsPageProps) {
                   <span className="text-4xl">🤖</span>
                   <div className="flex-1">
                     <CardTitle className="text-lg">{bot.name}</CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">ID: {bot.productId}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ID: {bot.productId}
+                    </p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-4 space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">{bot.description}</p>
-                
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {bot.description}
+                </p>
+
                 {bot.features.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-sm font-semibold text-muted-foreground">Features:</p>
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      Features:
+                    </p>
                     <ul className="space-y-1">
                       {bot.features.map((feature, i) => (
                         <li key={i} className="text-sm flex items-start gap-2">
@@ -253,10 +256,12 @@ export default function BotsPage({ type }: BotsPageProps) {
                     </ul>
                   </div>
                 )}
-                
+
                 <div className="pt-3 border-t border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-secondary">${bot.price}</span>
+                    <span className="text-2xl font-bold text-secondary">
+                      ${bot.price}
+                    </span>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -311,7 +316,9 @@ export default function BotsPage({ type }: BotsPageProps) {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     placeholder="e.g., Advanced War Bot Pro"
                     className="bg-input border-border"
                     required
@@ -323,7 +330,9 @@ export default function BotsPage({ type }: BotsPageProps) {
                   <textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Detailed description of the bot service..."
                     className="w-full min-h-[100px] rounded-md border border-border bg-input px-3 py-2 text-foreground resize-y"
                     required
@@ -337,7 +346,9 @@ export default function BotsPage({ type }: BotsPageProps) {
                       <div key={index} className="flex gap-2">
                         <Input
                           value={feature}
-                          onChange={(e) => handleFeatureChange(index, e.target.value)}
+                          onChange={(e) =>
+                            handleFeatureChange(index, e.target.value)
+                          }
                           placeholder={`Feature ${index + 1}`}
                           className="bg-input border-border flex-1"
                         />
@@ -373,7 +384,9 @@ export default function BotsPage({ type }: BotsPageProps) {
                     type="number"
                     step="0.01"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     placeholder="29.99"
                     className="bg-input border-border"
                     required

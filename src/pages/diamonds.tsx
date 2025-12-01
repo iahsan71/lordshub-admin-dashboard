@@ -15,11 +15,11 @@ import { Diamond } from "@/store/slices/diamondsSlice";
 export default function DiamondsPage() {
   const dispatch = useAppDispatch();
   const { diamonds, loading } = useAppSelector((state) => state.diamonds);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingDiamond, setEditingDiamond] = useState<Diamond | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -75,13 +75,11 @@ export default function DiamondsPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.description || !formData.price) {
-      alert("Please fill in all fields");
       return;
     }
 
     const price = parseFloat(formData.price);
     if (isNaN(price) || price <= 0) {
-      alert("Please enter a valid price");
       return;
     }
 
@@ -107,7 +105,7 @@ export default function DiamondsPage() {
       }
       closeModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to save diamond");
+      console.error(error);
     }
   };
 
@@ -118,7 +116,7 @@ export default function DiamondsPage() {
     try {
       await dispatch(deleteDiamond(diamond.id));
     } catch (error) {
-      alert("Failed to delete diamond");
+      console.error(error);
     }
   };
 
@@ -129,7 +127,9 @@ export default function DiamondsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Diamonds Management
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage diamonds packages</p>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Manage diamonds packages
+          </p>
         </div>
         <Button
           onClick={openAddModal}
@@ -185,16 +185,22 @@ export default function DiamondsPage() {
                   <span className="text-4xl">💎</span>
                   <div className="flex-1">
                     <CardTitle className="text-lg">{diamond.name}</CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">ID: {diamond.productId}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ID: {diamond.productId}
+                    </p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-4 space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">{diamond.description}</p>
-                
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {diamond.description}
+                </p>
+
                 <div className="pt-3 border-t border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-secondary">${diamond.price}</span>
+                    <span className="text-2xl font-bold text-secondary">
+                      ${diamond.price}
+                    </span>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -226,7 +232,11 @@ export default function DiamondsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle>{editingDiamond ? "Edit Diamond Package" : "Add New Diamond Package"}</CardTitle>
+              <CardTitle>
+                {editingDiamond
+                  ? "Edit Diamond Package"
+                  : "Add New Diamond Package"}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -249,7 +259,9 @@ export default function DiamondsPage() {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     placeholder="e.g., 1000 Diamonds Package"
                     className="bg-input border-border"
                     required
@@ -261,7 +273,9 @@ export default function DiamondsPage() {
                   <textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Detailed description of the diamond package..."
                     className="w-full min-h-[100px] rounded-md border border-border bg-input px-3 py-2 text-foreground resize-y"
                     required
@@ -275,7 +289,9 @@ export default function DiamondsPage() {
                     type="number"
                     step="0.01"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     placeholder="49.99"
                     className="bg-input border-border"
                     required

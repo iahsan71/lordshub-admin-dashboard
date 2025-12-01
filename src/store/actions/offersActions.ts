@@ -1,4 +1,4 @@
-import { AppDispatch } from '../index';
+import { AppDispatch } from "../index";
 import {
   setOffers,
   addOffer as addOfferToState,
@@ -7,7 +7,7 @@ import {
   setLoading,
   setError,
   Offer,
-} from '../slices/offersSlice';
+} from "../slices/offersSlice";
 import {
   collection,
   query,
@@ -18,14 +18,20 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '@/config/firebase';
+} from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { db, storage } from "@/config/firebase";
+import { toast } from "react-toastify";
 
 // Real-time listener for all offers
 export const subscribeToOffers = () => (dispatch: AppDispatch) => {
-  const offersRef = collection(db, 'offers');
-  const q = query(offersRef, orderBy('createdAt', 'desc'));
+  const offersRef = collection(db, "offers");
+  const q = query(offersRef, orderBy("createdAt", "desc"));
 
   const unsubscribe = onSnapshot(
     q,
@@ -38,8 +44,8 @@ export const subscribeToOffers = () => (dispatch: AppDispatch) => {
       dispatch(setLoading(false));
     },
     (error) => {
-      console.error('Error fetching offers:', error);
-      dispatch(setError('Failed to load offers'));
+      console.error("Error fetching offers:", error);
+      dispatch(setError("Failed to load offers"));
       dispatch(setLoading(false));
     }
   );
@@ -56,13 +62,13 @@ const generateProductId = (): string => {
 
 // Upload media file to Firebase Storage
 const uploadMedia = async (file: File, productId: string): Promise<string> => {
-  const fileExtension = file.name.split('.').pop();
+  const fileExtension = file.name.split(".").pop();
   const fileName = `offers/${productId}.${fileExtension}`;
   const storageRef = ref(storage, fileName);
-  
+
   await uploadBytes(storageRef, file);
   const downloadURL = await getDownloadURL(storageRef);
-  
+
   return downloadURL;
 };
 
@@ -72,7 +78,7 @@ const deleteMedia = async (mediaUrl: string): Promise<void> => {
     const storageRef = ref(storage, mediaUrl);
     await deleteObject(storageRef);
   } catch (error) {
-    console.error('Error deleting media:', error);
+    console.error("Error deleting media:", error);
   }
 };
 
@@ -82,7 +88,7 @@ export const addOffer =
     name: string;
     description: string;
     mediaFile: File;
-    mediaType: 'image' | 'video';
+    mediaType: "image" | "video";
   }) =>
   async (dispatch: AppDispatch) => {
     try {
@@ -95,7 +101,7 @@ export const addOffer =
       const mediaUrl = await uploadMedia(data.mediaFile, productId);
 
       // Add offer to Firestore
-      const offersRef = collection(db, 'offers');
+      const offersRef = collection(db, "offers");
       const docRef = await addDoc(offersRef, {
         productId,
         name: data.name,
@@ -107,21 +113,26 @@ export const addOffer =
       });
 
       dispatch(setLoading(false));
-      
+      toast.success("Offer added");
       return docRef.id;
     } catch (error) {
-      console.error('Error adding offer:', error);
+      console.error("Error adding offer:", error);
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to add offer';
+
+      let errorMessage = "Failed to add offer";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore and Storage rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore and Storage rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
@@ -136,7 +147,7 @@ export const updateOffer =
       name: string;
       description: string;
       mediaFile?: File;
-      mediaType: 'image' | 'video';
+      mediaType: "image" | "video";
       oldMediaUrl?: string;
     }
   ) =>
@@ -155,7 +166,7 @@ export const updateOffer =
       }
 
       // Update offer in Firestore
-      const offerRef = doc(db, 'offers', offerId);
+      const offerRef = doc(db, "offers", offerId);
       await updateDoc(offerRef, {
         name: data.name,
         description: data.description,
@@ -165,42 +176,53 @@ export const updateOffer =
       });
 
       dispatch(setLoading(false));
+      toast.success("Offer updated");
     } catch (error) {
-      console.error('Error updating offer:', error);
+      console.error("Error updating offer:", error);
       dispatch(setLoading(false));
-      
-      let errorMessage = 'Failed to update offer';
+
+      let errorMessage = "Failed to update offer";
       if (error instanceof Error) {
-        if (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Permission denied. Please ensure Firestore and Storage rules are set up correctly.';
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("Missing or insufficient permissions")
+        ) {
+          errorMessage =
+            "Permission denied. Please ensure Firestore and Storage rules are set up correctly.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
+      toast.error(errorMessage);
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
     }
   };
 
 // Delete offer
-export const deleteOffer = (offerId: string, mediaUrl: string) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(setLoading(true));
+export const deleteOffer =
+  (offerId: string, mediaUrl: string) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setLoading(true));
 
-    // Delete media from storage
-    await deleteMedia(mediaUrl);
+      // Delete media from storage
+      await deleteMedia(mediaUrl);
 
-    // Delete offer from Firestore
-    const offerRef = doc(db, 'offers', offerId);
-    await deleteDoc(offerRef);
+      // Delete offer from Firestore
+      const offerRef = doc(db, "offers", offerId);
+      await deleteDoc(offerRef);
 
-    dispatch(deleteOfferFromState(offerId));
-    dispatch(setLoading(false));
-  } catch (error) {
-    console.error('Error deleting offer:', error);
-    dispatch(setLoading(false));
-    dispatch(setError(error instanceof Error ? error.message : 'Failed to delete offer'));
-    throw error;
-  }
-};
+      dispatch(deleteOfferFromState(offerId));
+      dispatch(setLoading(false));
+      toast.success("Offer deleted");
+    } catch (error) {
+      console.error("Error deleting offer:", error);
+      dispatch(setLoading(false));
+      const message =
+        error instanceof Error ? error.message : "Failed to delete offer";
+      toast.error(message);
+      dispatch(setError(message));
+      throw error;
+    }
+  };
