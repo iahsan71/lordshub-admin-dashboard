@@ -8,6 +8,7 @@ export interface Message {
   type: 'text' | 'image';
   imageUrl?: string;
   timestamp: Timestamp;
+  sentVia?: 'web' | 'telegram';
 }
 
 export interface Chat {

@@ -105,6 +105,7 @@ export const subscribeToMessages =
             type: data.type || "text",
             imageUrl: data.imageUrl,
             timestamp: data.timestamp,
+            sentVia: data.sentVia,
           };
         }) as Message[];
         console.log("✅ Dispatching", messages.length, "messages");
@@ -134,6 +135,7 @@ export const sendMessage =
         type: "text",
         timestamp: serverTimestamp(),
         read: false,
+        sentVia: "web", // Mark as sent from web to differentiate from Telegram
       });
 
       // Update chat's last message and timestamp
@@ -204,6 +206,7 @@ export const sendImageMessage =
         imageUrl,
         timestamp: serverTimestamp(),
         read: false,
+        sentVia: "web", // Mark as sent from web to differentiate from Telegram
       });
 
       // Update chat's last message

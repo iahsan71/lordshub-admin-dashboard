@@ -256,11 +256,16 @@ export default function ChatPage() {
                             )}
                           </div>
                           <p
-                            className={`text-xs text-muted-foreground mt-1 ${
-                              m.from === "admin" ? "text-right" : "text-left"
+                            className={`text-xs text-muted-foreground mt-1 flex items-center gap-1 ${
+                              m.from === "admin" ? "justify-end" : "justify-start"
                             }`}
                           >
                             {formatMessageTime(m.timestamp)}
+                            {m.sentVia === "telegram" && m.from === "admin" && (
+                              <span className="text-[10px] bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">
+                                📱 Telegram
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>

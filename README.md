@@ -40,12 +40,12 @@ Organized into 4 main categories with dedicated pages:
 
 ### 3. **Chat Management** (`/dashboard/chat`)
 - Real-time customer conversations
-- Chat list with filters (New, Payment Marked, Verified, Completed)
-- Status badges and unread counters
+- **🤖 Telegram Integration** - Receive and reply to messages from Telegram
+- Chat list with unread counters
+- Status badges and message threading
 - Quick reply templates
-- Order status timeline
-- File attachment support
-- Payment proof display
+- Image support (both ways)
+- Real-time sync between web and Telegram
 
 
 
@@ -71,12 +71,14 @@ Organized into 4 main categories with dedicated pages:
 - **Frontend**: React.js + TypeScript + Vite
 - **Styling**: Tailwind CSS with custom theme
 - **Routing**: React Router DOM
+- **State Management**: Redux Toolkit
 - **Backend**: Firebase
   - Authentication (Admin login)
-  - Firestore (Products, Settings, Offers)
-  - Realtime Database (Chat system)
+  - Firestore (Products, Settings, Offers, Chat)
+  - Cloud Functions (Telegram integration)
   - Storage (Images, Videos)
   - Analytics
+- **Integrations**: Telegram Bot API
 
 ## 📦 Installation
 
@@ -93,6 +95,44 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+## 🤖 Telegram Integration Setup
+
+The admin dashboard includes Telegram integration for managing customer chats directly from Telegram.
+
+### Quick Setup
+
+```bash
+# Run automated setup
+./setup-telegram.sh
+```
+
+### Manual Setup
+
+```bash
+# 1. Install function dependencies
+cd functions && npm install
+
+# 2. Deploy functions
+npm run build
+cd .. && firebase deploy --only functions
+
+# 3. Configure webhook
+curl https://us-central1-lordshubgaming.cloudfunctions.net/setTelegramWebhook
+```
+
+### Features
+- ✅ Receive customer messages in Telegram
+- ✅ Reply directly from Telegram
+- ✅ Separate thread per customer
+- ✅ Image support (both ways)
+- ✅ Real-time sync with web app
+
+### Documentation
+- **Quick Start**: `TELEGRAM_SETUP.md`
+- **Quick Reference**: `TELEGRAM_QUICK_REFERENCE.md`
+- **Architecture**: `TELEGRAM_ARCHITECTURE.md`
+- **Complete Guide**: `TELEGRAM_INTEGRATION_SUMMARY.md`
 
 ## 🔥 Firebase Configuration
 
