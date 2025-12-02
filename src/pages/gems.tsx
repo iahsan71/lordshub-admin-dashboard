@@ -25,11 +25,15 @@ export default function GemsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [itemName, setItemName] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Edit Item Modal State
   const [editItemName, setEditItemName] = useState("");
   const [editQuantity, setEditQuantity] = useState("");
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
   // Fetch gems when activeTab changes
   useEffect(() => {
@@ -64,6 +68,8 @@ export default function GemsPage() {
     setSelectedGem(gem);
     setEditItemName(gem.itemName);
     setEditQuantity(gem.quantity.toString());
+    setEditImagePreview(gem.imageUrl || null);
+    setEditImageFile(null);
     setShowEditModal(true);
   };
 
@@ -98,6 +104,30 @@ export default function GemsPage() {
     setSelectedGem(null);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -107,11 +137,13 @@ export default function GemsPage() {
 
     setSubmitting(true);
     try {
-      await addGem(itemName.trim(), Number(quantity), activeTab);
+      await addGem(itemName.trim(), Number(quantity), activeTab, imageFile || undefined);
 
       // Reset form
       setItemName("");
       setQuantity("");
+      setImageFile(null);
+      setImagePreview(null);
       setShowAddModal(false);
 
       // Refresh the list
@@ -128,6 +160,8 @@ export default function GemsPage() {
     setShowAddModal(false);
     setItemName("");
     setQuantity("");
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleUpdateItem = async (e: React.FormEvent) => {
@@ -142,7 +176,8 @@ export default function GemsPage() {
       await updateGem(
         selectedGem.id,
         editItemName.trim(),
-        Number(editQuantity)
+        Number(editQuantity),
+        editImageFile || undefined
       );
 
       // Close modal
@@ -150,6 +185,8 @@ export default function GemsPage() {
       setSelectedGem(null);
       setEditItemName("");
       setEditQuantity("");
+      setEditImageFile(null);
+      setEditImagePreview(null);
 
       // Refresh the list
       const items = await getGemsByTab(activeTab);
@@ -166,6 +203,8 @@ export default function GemsPage() {
     setSelectedGem(null);
     setEditItemName("");
     setEditQuantity("");
+    setEditImageFile(null);
+    setEditImagePreview(null);
   };
 
   return (
@@ -340,6 +379,27 @@ export default function GemsPage() {
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="image">Item Image (Optional)</Label>
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={submitting}
+              className="cursor-pointer"
+            />
+            {imagePreview && (
+              <div className="mt-2 rounded-lg overflow-hidden border border-border">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-40 object-cover"
+                />
+              </div>
+            )}
+          </div>
+
           <div className="bg-muted p-3 rounded-md">
             <p className="text-sm text-muted-foreground">
               Category:{" "}
@@ -400,6 +460,27 @@ export default function GemsPage() {
               required
               disabled={submitting}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="editImage">Item Image (Optional)</Label>
+            <Input
+              id="editImage"
+              type="file"
+              accept="image/*"
+              onChange={handleEditImageChange}
+              disabled={submitting}
+              className="cursor-pointer"
+            />
+            {editImagePreview && (
+              <div className="mt-2 rounded-lg overflow-hidden border border-border">
+                <img
+                  src={editImagePreview}
+                  alt="Preview"
+                  className="w-full h-40 object-cover"
+                />
+              </div>
+            )}
           </div>
 
           {selectedGem && (

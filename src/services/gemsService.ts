@@ -1,5 +1,6 @@
 import { collection, getDocs, query, where, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from '@/config/firebase';
 import type { TabName } from '@/components/ui/tabs';
 import { toast } from 'react-toastify';
 
@@ -42,17 +43,36 @@ export async function getGemsByTab(tabName: TabName): Promise<GemItem[]> {
   }
 }
 /**
+ * Upload an image to Firebase Storage
+ * @param file - The image file to upload
+ * @param gemId - The gem document ID
+ * @returns The download URL of the uploaded image
+ */
+export async function uploadGemImage(file: File, gemId: string): Promise<string> {
+  try {
+    const storageRef = ref(storage, `gems/${gemId}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+}
 
+/**
  * Add a new gem item to Firestore
  * @param itemName - Name of the item
  * @param quantity - Quantity of the item
  * @param tabName - The tab/category for the item
+ * @param imageFile - Optional image file to upload
  * @returns The ID of the newly created document
  */
 export async function addGem(
   itemName: string,
   quantity: number,
-  tabName: TabName
+  tabName: TabName,
+  imageFile?: File
 ): Promise<string> {
   try {
     const gemsRef = collection(db, 'gems');
@@ -63,6 +83,12 @@ export async function addGem(
       tabName,
       createdAt: serverTimestamp(),
     });
+    
+    // Upload image if provided
+    if (imageFile) {
+      const imageUrl = await uploadGemImage(imageFile, docRef.id);
+      await updateDoc(docRef, { imageUrl });
+    }
     
     return docRef.id;
   } catch (error) {
@@ -76,19 +102,29 @@ export async function addGem(
  * @param id - Document ID
  * @param itemName - Updated item name
  * @param quantity - Updated quantity
+ * @param imageFile - Optional new image file to upload
  */
 export async function updateGem(
   id: string,
   itemName: string,
-  quantity: number
+  quantity: number,
+  imageFile?: File
 ): Promise<void> {
   try {
     const gemRef = doc(db, 'gems', id);
     
-    await updateDoc(gemRef, {
+    const updateData: any = {
       itemName,
       quantity,
-    });
+    };
+    
+    // Upload new image if provided
+    if (imageFile) {
+      const imageUrl = await uploadGemImage(imageFile, id);
+      updateData.imageUrl = imageUrl;
+    }
+    
+    await updateDoc(gemRef, updateData);
   } catch (error) {
     console.error('Error updating gem:', error);
     throw error;
