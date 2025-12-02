@@ -10,7 +10,7 @@ import TelegramBot from "node-telegram-bot-api";
 
 admin.initializeApp();
 
-const TELEGRAM_BOT_TOKEN = "8046918233:AAFOTe15mCJZfqQY1Fj1O9AAaSX1iLnWzu0";
+const TELEGRAM_BOT_TOKEN = "8046918233:AAEBiPcv-bPo2426MU6qKjRrNdvfkIf3NZ0";
 const ADMIN_TELEGRAM_ID = "6331413591";
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN);
@@ -110,7 +110,7 @@ export const telegramWebhook = functions.https.onRequest(async (req, res) => {
  */
 async function handleAdminReply(message: any) {
   try {
-    const replyToMessageId = message.reply_to_message.message_id;
+    // const replyToMessageId = message.reply_to_message.message_id;
     const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
     
     // Extract session ID from replied message

@@ -4,7 +4,7 @@ import TelegramBot from "node-telegram-bot-api";
 
 admin.initializeApp();
 
-const TELEGRAM_BOT_TOKEN = "8046918233:AAFOTe15mCJZfqQY1Fj1O9AAaSX1iLnWzu0";
+const TELEGRAM_BOT_TOKEN = "8046918233:AAEBiPcv-bPo2426MU6qKjRrNdvfkIf3NZ0";
 const ADMIN_TELEGRAM_ID = "6331413591";
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN);
