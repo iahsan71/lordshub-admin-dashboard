@@ -1,7 +1,7 @@
 {
-  "name": "Admin Dashboard",
-  "short_name": "Dashboard",
-  "description": "Admin Dashboard Application",
+  "name": "Lords Hub Admin",
+  "short_name": "Lords Hub",
+  "description": "Lords Hub Admin Application",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
