@@ -133,12 +133,12 @@ export default function SocialMediaLinksPage() {
     (url.startsWith("http://") || url.startsWith("https://"));
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Social Media Links</h1>
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Social Media Links</h1>
         <button
           onClick={handleOpenModal}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto"
         >
           Add Social Media Link
         </button>
@@ -147,69 +147,129 @@ export default function SocialMediaLinksPage() {
       {loading ? (
         <div className="text-center py-8">Loading...</div>
       ) : (
-        <div className="bg-card rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Platform
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  URL
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Created At
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {links.length === 0 ? (
+        <>
+          {/* Desktop Table View - Hidden on small screens */}
+          <div className="hidden md:block bg-card rounded-lg shadow overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted">
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-8 text-center text-muted-foreground"
-                  >
-                    No social media links found. Add one to get started.
-                  </td>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">
+                    Platform
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">
+                    URL
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">
+                    Created At
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                links.map((link) => (
-                  <tr key={link.id} className="border-t border-border">
-                    <td className="px-6 py-4">{link.platform}</td>
-                    <td className="px-6 py-4">
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {link.url}
-                      </a>
-                    </td>
-                    <td className="px-6 py-4">{formatDate(link.createdAt)}</td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleEditModal(link)}
-                        className="text-blue-600 hover:text-blue-800 mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(link.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
+              </thead>
+              <tbody>
+                {links.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-6 py-8 text-center text-muted-foreground"
+                    >
+                      No social media links found. Add one to get started.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : (
+                  links.map((link) => (
+                    <tr key={link.id} className="border-t border-border">
+                      <td className="px-6 py-4">{link.platform}</td>
+                      <td className="px-6 py-4">
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline break-all"
+                        >
+                          {link.url}
+                        </a>
+                      </td>
+                      <td className="px-6 py-4">{formatDate(link.createdAt)}</td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleEditModal(link)}
+                          className="text-blue-600 hover:text-blue-800 mr-3"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(link.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View - Visible only on small screens */}
+          <div className="md:hidden space-y-4">
+            {links.length === 0 ? (
+              <div className="bg-card rounded-lg shadow p-6 text-center text-muted-foreground">
+                No social media links found. Add one to get started.
+              </div>
+            ) : (
+              links.map((link) => (
+                <div
+                  key={link.id}
+                  className="bg-card rounded-lg shadow p-4 space-y-3"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="text-sm text-muted-foreground mb-1">
+                        Platform
+                      </div>
+                      <div className="font-semibold">{link.platform}</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatDate(link.createdAt)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      URL
+                    </div>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline text-sm break-all"
+                    >
+                      {link.url}
+                    </a>
+                  </div>
+
+                  <div className="flex gap-2 pt-2 border-t border-border">
+                    <button
+                      onClick={() => handleEditModal(link)}
+                      className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(link.id)}
+                      className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </>
       )}
 
       <Modal
