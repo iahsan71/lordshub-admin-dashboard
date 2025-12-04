@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "icon.svg"],
+      includeAssets: ["favicon.ico"],
       manifest: {
         name: "Admin Dashboard",
         short_name: "Dashboard",
@@ -21,10 +21,26 @@ export default defineConfig({
         icons: [
           {
             src: "/favicon.ico",
-            sizes: "64x64 32x32 24x24 16x16",
+            sizes: "48x48",
             type: "image/x-icon"
+          },
+          {
+            src: "/pwa-192x192.svg",
+            sizes: "192x192",
+            type: "image/svg+xml",
+            purpose: "any"
+          },
+          {
+            src: "/pwa-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any"
           }
         ]
+      },
+      devOptions: {
+        enabled: true,
+        type: "module"
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
