@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico"],
       manifest: {
-        name: "Admin Dashboard",
+        name: "Lordshub Admin",
         short_name: "Dashboard",
         description: "Admin Dashboard Application",
         theme_color: "#000000",
