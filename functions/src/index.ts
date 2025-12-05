@@ -177,8 +177,8 @@ export const onNewCustomerMessage = functions.firestore
 
       // Prepare message text
       let telegramMessage = `💬 New message from ${customerName}\n`;
-      telegramMessage += `[Session: ${sessionId}]\n`;
-      telegramMessage += `User ID: ${visitorId}\n\n`;
+      // telegramMessage += `[Session: ${sessionId}]\n`;
+      // telegramMessage += `User ID: ${visitorId}\n\n`;
 
       if (message.type === "image" && message.imageUrl) {
         // Send image with caption
