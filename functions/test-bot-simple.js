@@ -4,8 +4,8 @@
  */
 
 // Get bot token from command line or use default
-const BOT_TOKEN = process.argv[2] || '8046918233:AAEBiPcv-bPo2426MU6qKjRrNdvfkIf3NZ0';
-const ADMIN_ID = '6331413591';
+const BOT_TOKEN = process.argv[2] || '8029311115:AAH6JOMdBGuUekWMcg0TXNQy-ngUFQ1M6I0';
+const ADMIN_ID = '8249444980';
 
 console.log('🤖 Testing Telegram Bot');
 console.log('=======================\n');
