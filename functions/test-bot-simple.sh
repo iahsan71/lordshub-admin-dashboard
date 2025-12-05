@@ -3,8 +3,8 @@
 # Simple bot test using curl
 # Update BOT_TOKEN with your new bot token
 
-BOT_TOKEN="8046918233:AAEBiPcv-bPo2426MU6qKjRrNdvfkIf3NZ0"
-ADMIN_ID="6331413591"
+BOT_TOKEN="8029311115:AAH6JOMdBGuUekWMcg0TXNQy-ngUFQ1M6I0"
+ADMIN_ID="8249444980"
 
 echo "🤖 Testing Telegram Bot"
 echo "======================="

@@ -5,8 +5,8 @@
 
 const https = require('https');
 
-const BOT_TOKEN = '8046918233:AAEBiPcv-bPo2426MU6qKjRrNdvfkIf3NZ0';
-const ADMIN_ID = '6331413591';
+const BOT_TOKEN = '8029311115:AAH6JOMdBGuUekWMcg0TXNQy-ngUFQ1M6I0';
+const ADMIN_ID = '8249444980';
 
 function makeRequest(method, data = null) {
   return new Promise((resolve, reject) => {
