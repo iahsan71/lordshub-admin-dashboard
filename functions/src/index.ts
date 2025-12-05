@@ -173,7 +173,7 @@ export const onNewCustomerMessage = functions.firestore
 
       const sessionData = sessionDoc.data();
       const customerName = sessionData?.visitorName || "Guest";
-      const visitorId = sessionData?.visitorId || sessionId;
+      // const visitorId = sessionData?.visitorId || sessionId;
 
       // Prepare message text
       let telegramMessage = `💬 New message from ${customerName}\n`;
