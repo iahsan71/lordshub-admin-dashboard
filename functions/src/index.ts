@@ -44,6 +44,13 @@ export const telegramWebhook = functions.https.onRequest(async (req, res) => {
     // Handle reply to a message (threaded conversation)
     if (message.reply_to_message) {
       await handleAdminReply(message);
+    } else {
+      // Not a reply - send help message
+      await bot.sendMessage(
+        ADMIN_TELEGRAM_ID,
+        "ℹ️ To reply to a customer, please use the Reply button on their message.\n\n" +
+        "Don't send a new message - tap and hold (or right-click) on the customer's message and select Reply."
+      );
     }
 
     res.status(200).send("OK");
@@ -73,7 +80,7 @@ async function handleAdminReply(message: any) {
 
     // If not found in memory, check message text for session ID
     if (!targetChatSessionId) {
-      const replyText = message.reply_to_message.text || "";
+      const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
       const match = replyText.match(/\[Session: ([^\]]+)\]/);
       if (match) {
         targetChatSessionId = match[1];
@@ -177,8 +184,7 @@ export const onNewCustomerMessage = functions.firestore
 
       // Prepare message text
       let telegramMessage = `💬 New message from ${customerName}\n`;
-      // telegramMessage += `[Session: ${sessionId}]\n`;
-      // telegramMessage += `User ID: ${visitorId}\n\n`;
+      telegramMessage += `[Session: ${sessionId}]\n\n`;
 
       if (message.type === "image" && message.imageUrl) {
         // Send image with caption
