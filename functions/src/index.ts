@@ -167,7 +167,7 @@ async function handleAdminReply(message: any) {
       .doc(targetChatSessionId)
       .collection("messages");
 
-    const messageDoc = await messagesRef.add({
+    await messagesRef.add({
       sender: "admin",
       text: messageText,
       type: messageType,
