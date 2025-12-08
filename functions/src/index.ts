@@ -9,8 +9,40 @@ const ADMIN_TELEGRAM_ID = "8249444980";
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN);
 
-// Store mapping of chatSessionId -> telegramMessageId for threading
-const chatThreadMap = new Map<string, number>();
+/**
+ * Get thread message ID from Firestore
+ */
+async function getThreadMessageId(sessionId: string): Promise<number | null> {
+  try {
+    const doc = await admin.firestore()
+      .collection('telegramThreads')
+      .doc(sessionId)
+      .get();
+    
+    return doc.exists ? doc.data()?.messageId || null : null;
+  } catch (error) {
+    console.error("Error getting thread message ID:", error);
+    return null;
+  }
+}
+
+/**
+ * Store thread message ID in Firestore
+ */
+async function setThreadMessageId(sessionId: string, messageId: number): Promise<void> {
+  try {
+    await admin.firestore()
+      .collection('telegramThreads')
+      .doc(sessionId)
+      .set({
+        messageId,
+        sessionId,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+  } catch (error) {
+    console.error("Error setting thread message ID:", error);
+  }
+}
 
 /**
  * Webhook endpoint for Telegram bot
@@ -65,32 +97,32 @@ export const telegramWebhook = functions.https.onRequest(async (req, res) => {
  */
 async function handleAdminReply(message: any) {
   try {
-    const replyToMessageId = message.reply_to_message.message_id;
     
-    // Find which chat session this message belongs to
-    let targetChatSessionId: string | null = null;
+    // Extract session ID from replied message text
+    const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
     
-    // Search through our thread map
-    for (const [sessionId, messageId] of chatThreadMap.entries()) {
-      if (messageId === replyToMessageId) {
-        targetChatSessionId = sessionId;
-        break;
-      }
-    }
-
-    // If not found in memory, check message text for session ID
-    if (!targetChatSessionId) {
-      const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
-      const match = replyText.match(/\[Session: ([^\]]+)\]/);
-      if (match) {
-        targetChatSessionId = match[1];
-      }
-    }
+    const match = replyText.match(/\[Session: ([^\]]+)\]/);
+    const targetChatSessionId = match ? match[1] : null;
 
     if (!targetChatSessionId) {
+      console.error("❌ Could not extract session ID from:", replyText);
       await bot.sendMessage(
         ADMIN_TELEGRAM_ID,
-        "❌ Could not identify the chat session. Please reply to a customer message."
+        "❌ Could not identify the chat session. Please reply to a customer message that contains [Session: ...]"
+      );
+      return;
+    }
+
+    const sessionDoc = await admin.firestore()
+      .collection("chatSessions")
+      .doc(targetChatSessionId)
+      .get();
+
+    if (!sessionDoc.exists) {
+      console.error("❌ Session not found:", targetChatSessionId);
+      await bot.sendMessage(
+        ADMIN_TELEGRAM_ID,
+        `❌ Chat session not found: ${targetChatSessionId}`
       );
       return;
     }
@@ -105,12 +137,29 @@ async function handleAdminReply(message: any) {
       const photo = message.photo[message.photo.length - 1]; // Get highest resolution
       const fileId = photo.file_id;
       
-      // Get file URL from Telegram
-      const file = await bot.getFile(fileId);
-      imageUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${file.file_path}`;
-      messageText = message.caption || "📷 Image";
-      messageType = "image";
+      try {
+        const file = await bot.getFile(fileId);
+        imageUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+        messageText = message.caption || "📷 Image";
+        messageType = "image";
+      } catch (error) {
+        console.error("Error getting photo:", error);
+        await bot.sendMessage(
+          ADMIN_TELEGRAM_ID,
+          "❌ Failed to process image. Please try again."
+        );
+        return;
+      }
     }
+
+    if (!messageText.trim() && !imageUrl) {
+      await bot.sendMessage(
+        ADMIN_TELEGRAM_ID,
+        "❌ Message cannot be empty."
+      );
+      return;
+    }
+
 
     // Send message to Firestore
     const messagesRef = admin.firestore()
@@ -118,7 +167,7 @@ async function handleAdminReply(message: any) {
       .doc(targetChatSessionId)
       .collection("messages");
 
-    await messagesRef.add({
+    const messageDoc = await messagesRef.add({
       sender: "admin",
       text: messageText,
       type: messageType,
@@ -140,19 +189,9 @@ async function handleAdminReply(message: any) {
         unreadCount: 0
       });
 
-    // Confirm to admin
-    await bot.sendMessage(
-      ADMIN_TELEGRAM_ID,
-      "✅ Message sent successfully!",
-      { reply_to_message_id: message.message_id }
-    );
 
   } catch (error) {
-    console.error("Error handling admin reply:", error);
-    await bot.sendMessage(
-      ADMIN_TELEGRAM_ID,
-      `❌ Error sending message: ${error}`
-    );
+    console.error("❌ Error handling admin reply:", error);
   }
 }
 
@@ -179,36 +218,51 @@ export const onNewCustomerMessage = functions.firestore
         .get();
 
       const sessionData = sessionDoc.data();
-      const customerName = sessionData?.visitorName || "Guest";
-      // const visitorId = sessionData?.visitorId || sessionId;
+      const visitorId = sessionData?.visitorId || sessionId;
 
-      // Prepare message text
-      let telegramMessage = `💬 New message from ${customerName}\n`;
+      // Prepare message text with session ID
+      let telegramMessage = `New text from visitor ${visitorId}\n`;
       telegramMessage += `[Session: ${sessionId}]\n\n`;
+
+      // Get existing thread message ID
+      const threadMessageId = await getThreadMessageId(sessionId);
+
+      let sentMessage;
 
       if (message.type === "image" && message.imageUrl) {
         // Send image with caption
-        const sentMessage = await bot.sendPhoto(
+        const options: any = {
+          caption: telegramMessage + (message.text || "📷 Image")
+        };
+        
+        if (threadMessageId) {
+          options.reply_to_message_id = threadMessageId;
+        }
+
+        sentMessage = await bot.sendPhoto(
           ADMIN_TELEGRAM_ID,
           message.imageUrl,
-          {
-            caption: telegramMessage + (message.text || "📷 Image")
-          }
+          options
         );
-        
-        // Store thread mapping
-        chatThreadMap.set(sessionId, sentMessage.message_id);
       } else {
         // Send text message
         telegramMessage += message.text;
         
-        const sentMessage = await bot.sendMessage(
+        const options: any = {};
+        if (threadMessageId) {
+          options.reply_to_message_id = threadMessageId;
+        }
+
+        sentMessage = await bot.sendMessage(
           ADMIN_TELEGRAM_ID,
-          telegramMessage
+          telegramMessage,
+          options
         );
-        
-        // Store thread mapping
-        chatThreadMap.set(sessionId, sentMessage.message_id);
+      }
+
+      // Store thread mapping if this is the first message
+      if (!threadMessageId) {
+        await setThreadMessageId(sessionId, sentMessage.message_id);
       }
 
       console.log(`Notification sent to admin for session ${sessionId}`);
@@ -233,8 +287,8 @@ export const onNewAdminMessage = functions.firestore
         return;
       }
 
-      // Get the thread message ID
-      const threadMessageId = chatThreadMap.get(sessionId);
+      // Get the thread message ID from Firestore
+      const threadMessageId = await getThreadMessageId(sessionId);
       
       if (threadMessageId) {
         // Send as reply to keep thread organized
