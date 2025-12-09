@@ -4,6 +4,7 @@ import accountsReducer from './slices/accountsSlice';
 import diamondsReducer from './slices/diamondsSlice';
 import botsReducer from './slices/botsSlice';
 import offersReducer from './slices/offersSlice';
+import blogsReducer from './slices/blogsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     diamonds: diamondsReducer,
     bots: botsReducer,
     offers: offersReducer,
+    blogs: blogsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -33,8 +35,11 @@ export const store = configureStore({
           'offers/setOffers',
           'offers/addOffer',
           'offers/updateOffer',
+          'blogs/setBlogs',
+          'blogs/addBlog',
+          'blogs/updateBlog',
         ],
-        ignoredPaths: ['chat.chats', 'chat.messages', 'accounts.accounts', 'diamonds.diamonds', 'bots.bots', 'offers.offers'],
+        ignoredPaths: ['chat.chats', 'chat.messages', 'accounts.accounts', 'diamonds.diamonds', 'bots.bots', 'offers.offers', 'blogs.blogs'],
       },
     }),
 });

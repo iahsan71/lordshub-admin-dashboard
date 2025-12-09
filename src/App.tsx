@@ -15,6 +15,7 @@ import BotsPage from "./pages/bots";
 import OffersPage from "./pages/offers";
 import SocialMediaLinksPage from "./pages/socialMediaLinks";
 import SettingsPage from "./pages/settings";
+import BlogPage from "./pages/blog";
 import { AuthGuard } from "./components/authGuard";
 import DashboardLayout from "./components/dashboardLayout";
 
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="bots/farm" element={<BotsPage type="farm" />} />
             <Route path="offers" element={<OffersPage />} />
             <Route path="social-media-links" element={<SocialMediaLinksPage />} />
+            <Route path="blog" element={<BlogPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
