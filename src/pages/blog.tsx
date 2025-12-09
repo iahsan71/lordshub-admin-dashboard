@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmationModal } from "@/components/ui/confirmationModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   subscribeToBlogs,
@@ -20,6 +21,8 @@ export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
@@ -49,6 +52,7 @@ export default function BlogPage() {
   // Open add modal
   const openAddModal = () => {
     setEditingBlog(null);
+    setImagePreview(null);
     setFormData({
       title: "",
       description: "",
@@ -60,6 +64,7 @@ export default function BlogPage() {
   // Open edit modal
   const openEditModal = (blog: Blog) => {
     setEditingBlog(blog);
+    setImagePreview(blog.imageUrl || null);
     setFormData({
       title: blog.title,
       description: blog.description,
@@ -72,6 +77,7 @@ export default function BlogPage() {
   const closeModal = () => {
     setShowModal(false);
     setEditingBlog(null);
+    setImagePreview(null);
     setFormData({
       title: "",
       description: "",
@@ -87,6 +93,12 @@ export default function BlogPage() {
     const file = e.target.files?.[0];
     if (file) {
       setFormData({ ...formData, imageFile: file });
+      // Create preview URL for the new image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -126,11 +138,12 @@ export default function BlogPage() {
   };
 
   // Handle delete
-  const handleDelete = async (blog: Blog) => {
-    if (!confirm(`Are you sure you want to delete "${blog.title}"?`)) return;
+  const handleDelete = async () => {
+    if (!blogToDelete) return;
 
     try {
-      await dispatch(deleteBlog(blog.id, blog.imageUrl));
+      await dispatch(deleteBlog(blogToDelete.id, blogToDelete.imageUrl));
+      setBlogToDelete(null);
     } catch (error) {
       console.error(error);
     }
@@ -244,7 +257,7 @@ export default function BlogPage() {
                       size="sm"
                       variant="outline"
                       className="flex-1 border-destructive/50 hover:bg-destructive/10 text-destructive"
-                      onClick={() => handleDelete(blog)}
+                      onClick={() => setBlogToDelete(blog)}
                     >
                       Delete
                     </Button>
@@ -303,13 +316,15 @@ export default function BlogPage() {
                   )}
                 </div>
 
-                {editingBlog && editingBlog.imageUrl && (
+                {imagePreview && (
                   <div>
-                    <Label>Current Image</Label>
+                    <Label>
+                      {formData.imageFile ? "New Image Preview" : "Current Image"}
+                    </Label>
                     <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden mt-2">
                       <img
-                        src={editingBlog.imageUrl}
-                        alt={editingBlog.title}
+                        src={imagePreview}
+                        alt="Preview"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -355,6 +370,17 @@ export default function BlogPage() {
           </Card>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={!!blogToDelete}
+        title="Delete Blog Post"
+        description={`Are you sure you want to delete "${blogToDelete?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => setBlogToDelete(null)}
+      />
     </div>
   );
 }
